@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MessLedger — Complete SQL Queries Documentation</title>
+<style>
+  @page {
+    size: A4;
+    margin: 14mm 12mm 14mm 12mm;
+    @bottom-right {
+      content: counter(page);
+    }
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: #1e293b;
+    background-color: #ffffff;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+
+  .cover {
+    background: linear-gradient(135deg, #09090b 0%, #18181b 100%);
+    color: #ffffff;
+    padding: 36px 32px;
+    border-radius: 12px;
+    margin-bottom: 28px;
+    border-left: 6px solid #10b981;
+  }
+
+  .cover h1 {
+    font-size: 24pt;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 8px;
+    color: #ffffff;
+  }
+
+  .cover .subtitle {
+    font-size: 13pt;
+    color: #a1a1aa;
+    margin-bottom: 20px;
+  }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid #27272a;
+    font-size: 9.5pt;
+  }
+
+  .meta-item .label {
+    color: #71717a;
+    text-transform: uppercase;
+    font-size: 7.5pt;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+  }
+
+  .meta-item .value {
+    color: #e4e4e7;
+    font-weight: 600;
+  }
+
+  .section-title {
+    font-size: 15pt;
+    font-weight: 700;
+    color: #0f172a;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 6px;
+    margin-top: 26px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-title .badge {
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 8.5pt;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 9999px;
+    border: 1px solid #a7f3d0;
+  }
+
+  .matrix-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 24px;
+    font-size: 9.5pt;
+  }
+
+  .matrix-table th {
+    background-color: #f1f5f9;
+    color: #334155;
+    font-weight: 700;
+    text-align: left;
+    padding: 8px 10px;
+    border: 1px solid #cbd5e1;
+  }
+
+  .matrix-table td {
+    padding: 7px 10px;
+    border: 1px solid #e2e8f0;
+    color: #1e293b;
+  }
+
+  .matrix-table tr:nth-child(even) {
+    background-color: #f8fafc;
+  }
+
+  .matrix-table tfoot td {
+    font-weight: 700;
+    background-color: #e2e8f0;
+    color: #0f172a;
+  }
+
+  .query-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin-bottom: 14px;
+    overflow: hidden;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+  }
+
+  .query-header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .query-title {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .query-tag {
+    font-size: 7.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  .tag-select { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+  .tag-insert { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+  .tag-update { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+  .tag-delete { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+  .tag-ddl    { background: #f3e8ff; color: #7e22ce; border: 1px solid #e9d5ff; }
+
+  .query-code {
+    background: #09090b;
+    color: #e4e4e7;
+    font-family: "JetBrains Mono", Consolas, "Courier New", monospace;
+    font-size: 8pt;
+    line-height: 1.45;
+    padding: 10px 12px;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .query-notes {
+    padding: 6px 12px;
+    font-size: 8.5pt;
+    color: #64748b;
+    background: #ffffff;
+    border-top: 1px dashed #e2e8f0;
+  }
+
+  .page-break {
+    page-break-before: always;
+    break-before: page;
+  }
+
+  .footer-note {
+    text-align: center;
+    font-size: 8pt;
+    color: #94a3b8;
+    margin-top: 24px;
+    padding-top: 8px;
+    border-top: 1px solid #e2e8f0;
+  }
+</style>
+</head>
+<body>
+
+  <!-- Cover Header -->
+  <div class="cover">
+    <h1>MessLedger — SQL Queries Specification</h1>
+    <div class="subtitle">Complete Database Query Catalog, Relational Operations & Persistence Tier Architecture</div>
+    <div class="meta-grid">
+      <div class="meta-item">
+        <div class="label">Database Engine</div>
+        <div class="value">PostgreSQL 16 (Neon Serverless)</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Transport Protocol</div>
+        <div class="value">WebSockets (Port 443 via @neondatabase)</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Total SQL Queries</div>
+        <div class="value">114 Statements (42 SELECT, 21 INSERT, 29 UPDATE)</div>
+      </div>
+      <div class="meta-item">
+        <div class="label">Document Version</div>
+        <div class="value">v1.0.0 (November 2026)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Executive Summary -->
+  <div class="section-title">
+    Executive Query Matrix
+    <span class="badge">Overview</span>
+  </div>
+  <table class="matrix-table">
+    <thead>
+      <tr>
+        <th>Module / Source File</th>
+        <th style="text-align:center;">SELECT</th>
+        <th style="text-align:center;">INSERT</th>
+        <th style="text-align:center;">UPDATE</th>
+        <th style="text-align:center;">DELETE</th>
+        <th style="text-align:center;">DDL/CMD</th>
+        <th style="text-align:right;">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Database DDL & Migrations</strong> (<code>schema.sql</code>, <code>migrate*.js</code>)</td>
+        <td style="text-align:center;">1</td>
+        <td style="text-align:center;">1</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:center;">16</td>
+        <td style="text-align:right; font-weight:600;">18</td>
+      </tr>
+      <tr>
+        <td><strong>Authentication & Onboarding</strong> (<code>auth.controller.js</code>, <code>auth.js</code>)</td>
+        <td style="text-align:center;">12</td>
+        <td style="text-align:center;">6</td>
+        <td style="text-align:center;">7</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:right; font-weight:600;">25</td>
+      </tr>
+      <tr>
+        <td><strong>Billing & Late Penalties</strong> (<code>bills.controller.js</code>)</td>
+        <td style="text-align:center;">7</td>
+        <td style="text-align:center;">4</td>
+        <td style="text-align:center;">5</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:right; font-weight:600;">16</td>
+      </tr>
+      <tr>
+        <td><strong>Payments & FIFO Settlement</strong> (<code>payments.controller.js</code>)</td>
+        <td style="text-align:center;">5</td>
+        <td style="text-align:center;">5</td>
+        <td style="text-align:center;">6</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:right; font-weight:600;">16</td>
+      </tr>
+      <tr>
+        <td><strong>Transaction History Ledger</strong> (<code>transactions.controller.js</code>)</td>
+        <td style="text-align:center;">2</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:right; font-weight:600;">2</td>
+      </tr>
+      <tr>
+        <td><strong>Boarders Whitelist Roster</strong> (<code>boarders.controller.js</code>)</td>
+        <td style="text-align:center;">4</td>
+        <td style="text-align:center;">2</td>
+        <td style="text-align:center;">3</td>
+        <td style="text-align:center;">1</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:right; font-weight:600;">10</td>
+      </tr>
+      <tr>
+        <td><strong>User & Administrative Room Allocation</strong> (<code>user.controller.js</code>)</td>
+        <td style="text-align:center;">2</td>
+        <td style="text-align:center;">1</td>
+        <td style="text-align:center;">6</td>
+        <td style="text-align:center;">1</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:right; font-weight:600;">10</td>
+      </tr>
+      <tr>
+        <td><strong>Diet Leave Rebates</strong> (<code>rebates.controller.js</code>)</td>
+        <td style="text-align:center;">2</td>
+        <td style="text-align:center;">2</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:center;">1</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:right; font-weight:600;">5</td>
+      </tr>
+      <tr>
+        <td><strong>In-App Notification Center</strong> (<code>notifications.controller.js</code>)</td>
+        <td style="text-align:center;">3</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:center;">2</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:right; font-weight:600;">5</td>
+      </tr>
+      <tr>
+        <td><strong>Hostels & Core System Probes</strong> (<code>hostels.controller.js</code>, <code>db.js</code>, <code>app.js</code>)</td>
+        <td style="text-align:center;">4</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:center;">0</td>
+        <td style="text-align:center;">3</td>
+        <td style="text-align:right; font-weight:600;">7</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>TOTAL QUERIES IN MESSLEDGER</td>
+        <td style="text-align:center;">42</td>
+        <td style="text-align:center;">21</td>
+        <td style="text-align:center;">29</td>
+        <td style="text-align:center;">3</td>
+        <td style="text-align:center;">19</td>
+        <td style="text-align:right;">114</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <!-- Page Break -->
+  <div class="page-break"></div>
+
+  <!-- Section 1 -->
+  <div class="section-title">
+    1. Relational Schema & DDL Queries
+    <span class="badge">schema.sql & migrations</span>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">1.1 Hostels Master Table</span>
+      <span class="query-tag tag-ddl">CREATE TABLE</span>
+    </div>
+    <div class="query-code">CREATE TABLE IF NOT EXISTS hostels (
+    id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(50) NOT NULL,
+    full_name VARCHAR(150) NOT NULL,
+    type VARCHAR(10) NOT NULL DEFAULT 'MEN' CHECK (type IN ('MEN', 'WOMEN')),
+    senior_warden_name VARCHAR(100),
+    senior_warden_phone VARCHAR(30),
+    senior_warden_email VARCHAR(150),
+    warden_name VARCHAR(100),
+    warden_phone VARCHAR(30),
+    warden_email VARCHAR(150),
+    rooms TEXT[],
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);</div>
+    <div class="query-notes">Defines residential campus blocks, designated administrators, wardens, and dynamically maintained room rosters.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">1.2 Users Table (Identity & Permissions)</span>
+      <span class="query-tag tag-ddl">CREATE TABLE</span>
+    </div>
+    <div class="query-code">CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(150) UNIQUE NOT NULL,
+    password_hash VARCHAR(255),
+    role VARCHAR(20) DEFAULT 'STUDENT' CHECK (role IN ('STUDENT', 'ADMIN', 'WARDEN')),
+    hostel VARCHAR(50) REFERENCES hostels(id) ON DELETE SET NULL,
+    room VARCHAR(20),
+    roll_no VARCHAR(50) UNIQUE,
+    phone VARCHAR(30),
+    department VARCHAR(100),
+    avatar_url TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);</div>
+    <div class="query-notes">Single identity table supporting passwordless student Google OAuth (password_hash is NULL) and admin credentials.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">1.3 Boarders Master Roster (Whitelist Directory)</span>
+      <span class="query-tag tag-ddl">CREATE TABLE</span>
+    </div>
+    <div class="query-code">CREATE TABLE IF NOT EXISTS boarders (
+    id VARCHAR(50) PRIMARY KEY,
+    roll_no VARCHAR(50) UNIQUE NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    room VARCHAR(20),
+    email VARCHAR(150) NOT NULL,
+    hostel VARCHAR(50) NOT NULL,
+    department VARCHAR(100),
+    phone VARCHAR(30),
+    is_registered BOOLEAN DEFAULT FALSE,
+    registered_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);</div>
+    <div class="query-notes">Institutional whitelist ensuring only valid pre-allocated university students can register accounts.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">1.4 Monthly Mess Bills Table</span>
+      <span class="query-tag tag-ddl">CREATE TABLE</span>
+    </div>
+    <div class="query-code">CREATE TABLE IF NOT EXISTS bills (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) REFERENCES users(id) ON DELETE CASCADE,
+    month VARCHAR(50) NOT NULL,
+    month_code VARCHAR(10) NOT NULL,
+    base_bill NUMERIC(10, 2) DEFAULT 0,
+    paid_amount NUMERIC(10, 2) DEFAULT 0,
+    due_amount NUMERIC(10, 2) DEFAULT 0,
+    late_fine NUMERIC(10, 2) DEFAULT 0,
+    previous_due NUMERIC(10, 2) DEFAULT 0,
+    total_payable NUMERIC(10, 2) DEFAULT 0,
+    fine_days INTEGER DEFAULT 0,
+    fine_per_day NUMERIC(10, 2) DEFAULT 20,
+    payment_deadline DATE,
+    status VARCHAR(20) DEFAULT 'DUE' CHECK (status IN ('PAID', 'DUE', 'OVERDUE', 'PARTIAL')),
+    billing_cycle VARCHAR(100),
+    meal_counts JSONB,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);</div>
+    <div class="query-notes">Maintains itemized monthly fees, dynamic ₹20/day penalty days, carry-forward arrears, and meal breakdown.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">1.5 Payments & Transactions Ledger</span>
+      <span class="query-tag tag-ddl">CREATE TABLE</span>
+    </div>
+    <div class="query-code">CREATE TABLE IF NOT EXISTS payments (
+    id VARCHAR(50) PRIMARY KEY,
+    bill_id VARCHAR(50) REFERENCES bills(id) ON DELETE SET NULL,
+    user_id VARCHAR(50) REFERENCES users(id) ON DELETE CASCADE,
+    amount NUMERIC(10, 2) NOT NULL,
+    payment_method VARCHAR(50) DEFAULT 'ONLINE',
+    transaction_id VARCHAR(100) UNIQUE,
+    status VARCHAR(20) DEFAULT 'SUCCESS' CHECK (status IN ('SUCCESS', 'PENDING', 'FAILED')),
+    razorpay_order_id VARCHAR(100),
+    razorpay_payment_id VARCHAR(100),
+    razorpay_signature TEXT,
+    failure_reason TEXT,
+    fee NUMERIC(10, 2) DEFAULT 0,
+    tax NUMERIC(10, 2) DEFAULT 0,
+    idempotency_key VARCHAR(100) UNIQUE,
+    raw_response JSONB,
+    paid_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);</div>
+    <div class="query-notes">Gateway ledger capturing cryptographic HMAC signatures, idempotency keys, and webhook raw responses.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">1.6 Notifications Table</span>
+      <span class="query-tag tag-ddl">CREATE TABLE</span>
+    </div>
+    <div class="query-code">CREATE TABLE IF NOT EXISTS notifications (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(200) NOT NULL,
+    message TEXT NOT NULL,
+    type VARCHAR(50) DEFAULT 'INFO',
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);</div>
+    <div class="query-notes">In-app alert storage for bill publication, payment receipts, room allocations, and overdue reminders.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">1.7 Diet Rebates Table & Performance Indexes</span>
+      <span class="query-tag tag-ddl">CREATE TABLE & INDEXES</span>
+    </div>
+    <div class="query-code">CREATE TABLE IF NOT EXISTS rebates (
+    id VARCHAR(50) PRIMARY KEY,
+    user_id VARCHAR(50) UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    amount NUMERIC(10, 2) NOT NULL DEFAULT 0,
+    days INTEGER DEFAULT 0,
+    daily_rate NUMERIC(10, 2) DEFAULT 115,
+    calc_mode VARCHAR(20) DEFAULT 'DAYS',
+    app_ref VARCHAR(100),
+    reason_category VARCHAR(50),
+    from_date DATE,
+    to_date DATE,
+    remarks TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_payments_rzp_order ON payments(razorpay_order_id);
+CREATE INDEX IF NOT EXISTS idx_payments_rzp_payment ON payments(razorpay_payment_id);
+CREATE INDEX IF NOT EXISTS idx_payments_user_status ON payments(user_id, status);</div>
+    <div class="query-notes">Diet rebates table (1:1 per student) plus B-Tree performance indexes on payments table.</div>
+  </div>
+
+  <!-- Page Break -->
+  <div class="page-break"></div>
+
+  <!-- Section 2 -->
+  <div class="section-title">
+    2. Authentication & Onboarding Queries
+    <span class="badge">auth.controller.js & auth.js</span>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">2.1 Active Session Identity Lookup</span>
+      <span class="query-tag tag-select">SELECT</span>
+    </div>
+    <div class="query-code">SELECT id, name, email, role, hostel, room, roll_no, phone, department, avatar_url, created_at 
+FROM users 
+WHERE id = $1;</div>
+    <div class="query-notes">Executed by <code>authenticate</code> middleware on every secured request to reconstruct the authenticated user state.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">2.2 Boarder Roster Verification</span>
+      <span class="query-tag tag-select">SELECT</span>
+    </div>
+    <div class="query-code">SELECT * FROM boarders WHERE UPPER(roll_no) = $1;
+SELECT id FROM users WHERE LOWER(email) = $1;
+SELECT id FROM hostels WHERE LOWER(id) = LOWER($1) OR LOWER(name) = LOWER($1) LIMIT 1;</div>
+    <div class="query-notes">Verifies that a student exists on the university master roster and validates hostel assignment before registration.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">2.3 Student Registration & Initial Dues Issuance</span>
+      <span class="query-tag tag-insert">INSERT / UPDATE</span>
+    </div>
+    <div class="query-code">-- Insert user account
+INSERT INTO users (id, name, email, password_hash, role, hostel, room, roll_no, phone, department) 
+VALUES ($1, $2, $3, $4, 'STUDENT', $5, $6, $7, $8, $9) 
+RETURNING *;
+
+-- Mark boarder whitelist entry as registered
+UPDATE boarders SET is_registered = TRUE, registered_at = NOW() WHERE UPPER(roll_no) = $1;
+
+-- Issue initial month joining bill
+INSERT INTO bills (
+    id, user_id, month, month_code, base_bill, paid_amount, due_amount, late_fine,
+    previous_due, total_payable, fine_days, fine_per_day, payment_deadline,
+    status, billing_cycle, meal_counts
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16);
+
+-- Send welcome alert
+INSERT INTO notifications (id, user_id, title, message, type) 
+VALUES ($1, $2, $3, $4, 'SYSTEM');</div>
+    <div class="query-notes">Runs during self-registration: locks whitelist record, generates onboarding bill cycle, and dispatches in-app welcome.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">2.4 Admin Registration & Hostel Assignment</span>
+      <span class="query-tag tag-insert">INSERT / UPDATE</span>
+    </div>
+    <div class="query-code">-- Register admin user
+INSERT INTO users (id, name, email, password_hash, role, hostel, phone) 
+VALUES ($1, $2, $3, $4, 'ADMIN', $5, $6) 
+RETURNING *;
+
+-- Propagate Senior Warden / Warden contact info to hostels master record
+UPDATE hostels SET warden_name = $1, warden_email = $2, warden_phone = $3 WHERE LOWER(id) = LOWER($4);
+UPDATE hostels SET senior_warden_name = $1, senior_warden_email = $2, senior_warden_phone = $3 WHERE LOWER(id) = LOWER($4);</div>
+    <div class="query-notes">Executed upon successful verification of the <code>MESS_ADMIN_2026</code> invite token to establish warden accounts.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">2.5 Google OAuth 2.0 Identity Resolution & Auto-Provisioning</span>
+      <span class="query-tag tag-select">SELECT / INSERT / UPDATE</span>
+    </div>
+    <div class="query-code">-- 1. Check if email exists in boarders pre-authorized directory
+SELECT * FROM boarders WHERE LOWER(email) = $1 LIMIT 1;
+
+-- 2. Check if user already registered by email or roll_no
+SELECT * FROM users WHERE LOWER(email) = $1 OR (roll_no IS NOT NULL AND UPPER(roll_no) = UPPER($2)) LIMIT 1;
+
+-- 3. If exists, update avatar and sync latest contact info
+UPDATE users 
+SET email = $1, name = COALESCE($2, name), hostel = COALESCE($3, hostel),
+    room = COALESCE($4, room), department = COALESCE($5, department),
+    phone = COALESCE($6, phone), avatar_url = COALESCE($7, avatar_url), updated_at = NOW() 
+WHERE id = $8;
+
+-- 4. If new, provision passwordless student record (password_hash = NULL)
+INSERT INTO users (id, name, email, role, hostel, room, roll_no, department, phone, avatar_url) 
+VALUES ($1, $2, $3, 'STUDENT', $4, $5, $6, $7, $8, $9) 
+RETURNING *;
+
+-- 5. Mark roster registered
+UPDATE boarders SET is_registered = TRUE, registered_at = NOW() WHERE id = $1;</div>
+    <div class="query-notes">Governs frictionless student sign-in with Tezpur University Google Workspace accounts.</div>
+  </div>
+
+  <!-- Page Break -->
+  <div class="page-break"></div>
+
+  <!-- Section 3 -->
+  <div class="section-title">
+    3. Billing & Late Penalties Queries
+    <span class="badge">bills.controller.js</span>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">3.1 Dynamic Late Fine Synchronization (₹20/day)</span>
+      <span class="query-tag tag-update">UPDATE</span>
+    </div>
+    <div class="query-code">UPDATE bills 
+SET late_fine = $1, fine_days = $2, total_payable = $3, due_amount = $4 
+WHERE id = $5;</div>
+    <div class="query-notes">Called by <code>syncLateFines()</code> to accrue ₹20 per day (capped at 30 days / ₹600) for bills past payment deadline.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">3.2 Student Dues & Bill History Retrieval</span>
+      <span class="query-tag tag-select">SELECT</span>
+    </div>
+    <div class="query-code">SELECT b.*, u.name, u.roll_no, u.room, u.hostel, u.email, u.role 
+FROM bills b 
+LEFT JOIN users u ON b.user_id = u.id 
+WHERE b.user_id = $1 
+ORDER BY b.month_code DESC, b.created_at DESC;
+
+SELECT * FROM rebates WHERE user_id = $1 LIMIT 1;</div>
+    <div class="query-notes">Fetches student's monthly bill breakdown along with any active diet rebates to display on the boarder dashboard.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">3.3 Prior Month Unsettled Dues Calculation</span>
+      <span class="query-tag tag-select">SELECT</span>
+    </div>
+    <div class="query-code">SELECT COALESCE(SUM(due_amount), 0) AS prior_due 
+FROM bills 
+WHERE user_id = $1 AND status != 'PAID' AND month_code < $2;</div>
+    <div class="query-notes">Aggregates past arrears strictly for billing cycles before the target month to populate <code>previous_due</code>.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">3.4 Mass Monthly Mess Bill Generation & Upsert</span>
+      <span class="query-tag tag-insert">INSERT / UPDATE</span>
+    </div>
+    <div class="query-code">-- Check existing cycle
+SELECT id, paid_amount FROM bills WHERE user_id = $1 AND month_code = $2 LIMIT 1;
+
+-- If existing, update billing details
+UPDATE bills
+SET month = $1, base_bill = $2, due_amount = $3, previous_due = $4,
+    total_payable = $5, payment_deadline = $6, billing_cycle = $7,
+    late_fine = $8, fine_days = $9, status = $10
+WHERE id = $11;
+
+-- If new, insert monthly bill row
+INSERT INTO bills (
+    id, user_id, month, month_code, base_bill, paid_amount, due_amount,
+    late_fine, previous_due, total_payable, fine_days, fine_per_day,
+    payment_deadline, status, billing_cycle, meal_counts
+) VALUES ($1, $2, $3, $4, $5, 0, $6, $7, $8, $9, $10, 20, $11, 'DUE', $12, $13);
+
+-- Deliver notification to student
+INSERT INTO notifications (id, user_id, title, message, type, is_read) 
+VALUES ($1, $2, $3, $4, 'BILL', FALSE);</div>
+    <div class="query-notes">Batch executed by wardens on <code>POST /api/bills/generate</code> for all residents of their hostel block.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">3.5 Defaulter Resident Identification & Automated Reminders</span>
+      <span class="query-tag tag-select">SELECT / INSERT</span>
+    </div>
+    <div class="query-code">-- 1. Identify all hostel residents with overdue / unpaid balances
+SELECT u.id, u.name, u.email, u.roll_no, u.room,
+       SUM(b.due_amount) AS total_due,
+       COUNT(b.id) AS unpaid_bills_count,
+       MIN(b.payment_deadline) AS earliest_deadline
+FROM users u
+JOIN bills b ON u.id = b.user_id
+WHERE (LOWER(u.hostel) = LOWER($1) OR UPPER(u.hostel) = UPPER($1))
+  AND b.status IN ('DUE', 'OVERDUE', 'PARTIAL')
+  AND b.due_amount > 0
+GROUP BY u.id, u.name, u.email, u.roll_no, u.room
+HAVING SUM(b.due_amount) > 0;
+
+-- 2. Dispatch reminder notification for each defaulter
+INSERT INTO notifications (id, user_id, title, message, type, is_read) 
+VALUES ($1, $2, $3, $4, 'BILL', FALSE);</div>
+    <div class="query-notes">Triggered when hostel administrators click <strong>"Send Reminders"</strong> on <code>AdminDashboard.jsx</code>.</div>
+  </div>
+
+  <!-- Page Break -->
+  <div class="page-break"></div>
+
+  <!-- Section 4 -->
+  <div class="section-title">
+    4. Payments & FIFO Settlement Engine
+    <span class="badge">payments.controller.js</span>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">4.1 Chronological Unpaid Bills Query with Row-Level Lock</span>
+      <span class="query-tag tag-select">SELECT (FOR UPDATE)</span>
+    </div>
+    <div class="query-code">SELECT * FROM bills 
+WHERE user_id = $1 AND status != 'PAID' 
+ORDER BY month_code ASC, created_at ASC FOR UPDATE;</div>
+    <div class="query-notes">Applies PostgreSQL <code>FOR UPDATE</code> exclusive row locks inside <code>withTransaction</code> to prevent race conditions during payment.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">4.2 FIFO Settlement Dues Allocation</span>
+      <span class="query-tag tag-update">UPDATE</span>
+    </div>
+    <div class="query-code">-- When payment covers or exceeds bill due
+UPDATE bills SET status = 'PAID', due_amount = 0 WHERE id = $1 RETURNING *;
+
+-- When payment partially settles the bill
+UPDATE bills SET paid_amount = $1, due_amount = $2, status = $3 WHERE id = $4 RETURNING *;</div>
+    <div class="query-notes">Iterates through oldest unpaid months first, cascading funds until unallocated balance reaches zero.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">4.3 Payment Order Initiation with Idempotency</span>
+      <span class="query-tag tag-insert">INSERT</span>
+    </div>
+    <div class="query-code">INSERT INTO payments (
+    id, bill_id, user_id, amount, payment_method, razorpay_order_id, status, idempotency_key
+) VALUES ($1, $2, $3, $4, $5, $6, 'PENDING', $7) 
+ON CONFLICT (idempotency_key) DO UPDATE SET amount = EXCLUDED.amount;</div>
+    <div class="query-notes">Pre-creates payment row when client initiates Razorpay checkout to track in-flight gateway orders.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">4.4 Payment Verification & Administrative Alert Dispatch</span>
+      <span class="query-tag tag-update">UPDATE / INSERT</span>
+    </div>
+    <div class="query-code">-- 1. Prevent duplicate processing
+SELECT * FROM payments 
+WHERE (razorpay_payment_id = $1 OR transaction_id = $1 OR razorpay_order_id = $2) 
+  AND status = 'SUCCESS' 
+LIMIT 1;
+
+-- 2. Update payment record to SUCCESS
+UPDATE payments
+SET status = 'SUCCESS', transaction_id = $1, razorpay_payment_id = $2,
+    razorpay_signature = $3, bill_id = COALESCE(bill_id, $4), payment_method = $5,
+    amount = $6, paid_at = CURRENT_TIMESTAMP
+WHERE razorpay_order_id = $7
+RETURNING *;
+
+-- 3. Dispatch receipt alert to student
+INSERT INTO notifications (id, user_id, title, message, type) 
+VALUES ($1, $2, $3, $4, 'PAYMENT');
+
+-- 4. Locate and notify hostel warden / admin
+SELECT id, name FROM users 
+WHERE role IN ('ADMIN', 'WARDEN') 
+  AND (LOWER(hostel) = LOWER($1) OR UPPER(hostel) = UPPER($1));
+
+INSERT INTO notifications (id, user_id, title, message, type) 
+VALUES ($1, $2, $3, $4, 'PAYMENT');</div>
+    <div class="query-notes">Executes atomically upon client HMAC signature verification on <code>POST /api/payments/verify</code>.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">4.5 Asynchronous Webhook Handlers (Captured & Failed)</span>
+      <span class="query-tag tag-update">UPDATE / INSERT</span>
+    </div>
+    <div class="query-code">-- On 'payment.captured' / 'order.paid'
+UPDATE payments
+SET status = 'SUCCESS', transaction_id = $1, razorpay_payment_id = $2,
+    amount = $3, paid_at = CURRENT_TIMESTAMP, raw_response = $4
+WHERE razorpay_order_id = $5;
+
+-- On 'payment.failed'
+UPDATE payments
+SET status = 'FAILED', razorpay_payment_id = $1, failure_reason = $2, raw_response = $3
+WHERE razorpay_order_id = $4;
+
+INSERT INTO notifications (id, user_id, title, message, type) 
+VALUES ($1, $2, $3, $4, 'PAYMENT');</div>
+    <div class="query-notes">Fallback handler triggered directly by Razorpay servers if user closes the browser before frontend verification.</div>
+  </div>
+
+  <!-- Page Break -->
+  <div class="page-break"></div>
+
+  <!-- Section 5 -->
+  <div class="section-title">
+    5. Transaction History & Audit Ledger Queries
+    <span class="badge">transactions.controller.js</span>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">5.1 Boarder Personal Transaction History</span>
+      <span class="query-tag tag-select">SELECT</span>
+    </div>
+    <div class="query-code">SELECT p.*, b.month, u.name AS user_name, u.roll_no, u.hostel, u.room 
+FROM payments p 
+LEFT JOIN bills b ON p.bill_id = b.id 
+LEFT JOIN users u ON p.user_id = u.id 
+WHERE p.user_id = $1 
+ORDER BY p.paid_at DESC;</div>
+    <div class="query-notes">Displays chronological payment receipts with Razorpay transaction IDs, payment methods, and settled months.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">5.2 Administrative Hostel Payment Ledger</span>
+      <span class="query-tag tag-select">SELECT</span>
+    </div>
+    <div class="query-code">SELECT p.*, b.month, u.name AS user_name, u.roll_no, u.hostel, u.room 
+FROM payments p 
+LEFT JOIN bills b ON p.bill_id = b.id 
+LEFT JOIN users u ON p.user_id = u.id 
+WHERE (LOWER(u.hostel) = LOWER($1) OR UPPER(u.hostel) = UPPER($1)) 
+ORDER BY p.paid_at DESC 
+LIMIT 200;</div>
+    <div class="query-notes">Provides wardens and hostel accountants with an audit trail of all incoming resident fee payments.</div>
+  </div>
+
+  <!-- Section 6 -->
+  <div class="section-title">
+    6. Boarders Whitelist & Roster Queries
+    <span class="badge">boarders.controller.js</span>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">6.1 Dynamic Hostels Room Array Synchronization</span>
+      <span class="query-tag tag-update">UPDATE</span>
+    </div>
+    <div class="query-code">UPDATE hostels
+SET rooms = (
+    SELECT COALESCE(array_agg(DISTINCT room ORDER BY room), '{}')
+    FROM boarders
+    WHERE LOWER(hostel) = LOWER($1) AND room IS NOT NULL AND TRIM(room) != ''
+)
+WHERE LOWER(id) = LOWER($1);</div>
+    <div class="query-notes">Maintains the <code>hostels.rooms</code> array in real-time based on active room allocations in the boarders table.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">6.2 Master Boarders CRUD & Cross-Table Synchronization</span>
+      <span class="query-tag tag-select">SELECT / INSERT / UPDATE / DELETE</span>
+    </div>
+    <div class="query-code">-- 1. Check duplicate roll number or email
+SELECT id FROM boarders WHERE UPPER(roll_no) = $1 OR LOWER(email) = $2;
+
+-- 2. Insert new pre-authorized resident
+INSERT INTO boarders (id, roll_no, name, room, email, hostel, department, phone, is_registered) 
+VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE) 
+RETURNING *;
+
+-- 3. Update boarder and synchronize active user profile
+UPDATE boarders 
+SET roll_no = COALESCE($1, roll_no), name = COALESCE($2, name), room = COALESCE($3, room),
+    email = COALESCE($4, email), hostel = COALESCE($5, hostel), department = COALESCE($6, department),
+    phone = COALESCE($7, phone) 
+WHERE id = $8 
+RETURNING *;
+
+UPDATE users 
+SET name = COALESCE($1, name), room = COALESCE($2, room), email = COALESCE($3, email),
+    department = COALESCE($4, department), phone = COALESCE($5, phone), updated_at = NOW() 
+WHERE UPPER(roll_no) = UPPER($6);
+
+-- 4. Delete boarder from whitelist
+DELETE FROM boarders WHERE id = $1 RETURNING id, hostel;</div>
+    <div class="query-notes">Used in <code>AdminBoarders.jsx</code> for single student management and CSV batch import.</div>
+  </div>
+
+  <!-- Page Break -->
+  <div class="page-break"></div>
+
+  <!-- Section 7 -->
+  <div class="section-title">
+    7. User & Administrative Room Reallocation
+    <span class="badge">user.controller.js</span>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">7.1 Student Profile Update (Room Modification Omitted)</span>
+      <span class="query-tag tag-update">UPDATE</span>
+    </div>
+    <div class="query-code">UPDATE users
+SET name = COALESCE($1, name),
+    phone = COALESCE($2, phone),
+    department = COALESCE($3, department),
+    avatar_url = COALESCE($4, avatar_url),
+    updated_at = NOW()
+WHERE id = $5
+RETURNING id, name, email, role, hostel, room, roll_no, phone, department, avatar_url, created_at;</div>
+    <div class="query-notes">Allows students to update personal details while strictly preventing unauthorized self-reallocation of rooms.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">7.2 Administrative Room Reallocation & Student Alert</span>
+      <span class="query-tag tag-update">UPDATE / INSERT</span>
+    </div>
+    <div class="query-code">-- 1. Update room assignment in users table (Strictly STUDENT role)
+UPDATE users 
+SET room = $1, updated_at = NOW() 
+WHERE id = $2 AND role = 'STUDENT' 
+RETURNING id, name, roll_no, room, hostel;
+
+-- 2. Propagate new room assignment to boarders master whitelist
+UPDATE boarders SET room = $1 WHERE UPPER(roll_no) = UPPER($2);
+
+-- 3. Emit room change notification to student
+INSERT INTO notifications (id, user_id, title, message, type, is_read) 
+VALUES ($1, $2, $3, $4, 'INFO', FALSE);</div>
+    <div class="query-notes">Restricted to Administrators on <code>PUT /api/user/:id/room</code> to manage hostel room transfers.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">7.3 User Account Cascade Deletion</span>
+      <span class="query-tag tag-delete">DELETE</span>
+    </div>
+    <div class="query-code">-- 1. Reset whitelist registration status
+UPDATE boarders SET is_registered = FALSE, registered_at = NULL WHERE UPPER(roll_no) = UPPER($1);
+
+-- 2. Permanently delete user account
+DELETE FROM users WHERE id = $1;</div>
+    <div class="query-notes">Cascades to associated <code>bills</code>, <code>payments</code>, and <code>notifications</code> via foreign key constraints.</div>
+  </div>
+
+  <!-- Section 8 -->
+  <div class="section-title">
+    8. Diet Rebates, Notifications & Core Probes
+    <span class="badge">rebates, notifications & system</span>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">8.1 Diet Concession Upsert & Removal</span>
+      <span class="query-tag tag-insert">INSERT (ON CONFLICT) / DELETE</span>
+    </div>
+    <div class="query-code">-- Upsert student diet rebate concession (days * daily_rate)
+INSERT INTO rebates (
+    id, user_id, amount, days, daily_rate, calc_mode, app_ref,
+    reason_category, from_date, to_date, remarks, updated_at
+) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+ON CONFLICT (user_id) DO UPDATE 
+SET amount = EXCLUDED.amount, days = EXCLUDED.days, daily_rate = EXCLUDED.daily_rate,
+    calc_mode = EXCLUDED.calc_mode, app_ref = EXCLUDED.app_ref,
+    reason_category = EXCLUDED.reason_category, from_date = EXCLUDED.from_date,
+    to_date = EXCLUDED.to_date, remarks = EXCLUDED.remarks, updated_at = NOW()
+RETURNING *;
+
+-- Delete active rebate concession
+DELETE FROM rebates WHERE user_id = $1;</div>
+    <div class="query-notes">Managed by Wardens on <code>/api/rebates</code> to grant or revoke billing waivers for approved leave.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">8.2 In-App Notification Center Reads</span>
+      <span class="query-tag tag-select">SELECT / UPDATE</span>
+    </div>
+    <div class="query-code">-- Fetch notifications
+SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT 50;
+
+-- Mark single read
+UPDATE notifications SET is_read = TRUE WHERE id = $1 AND user_id = $2;
+
+-- Mark all read
+UPDATE notifications SET is_read = TRUE WHERE user_id = $1;</div>
+    <div class="query-notes">Powers the notifications bell badge and alert drawer on student and administrator consoles.</div>
+  </div>
+
+  <div class="query-card">
+    <div class="query-header">
+      <span class="query-title">8.3 Hostels Directory, Health Check & Transaction Control</span>
+      <span class="query-tag tag-select">SELECT & TRANSACTION COMMANDS</span>
+    </div>
+    <div class="query-code">SELECT * FROM hostels ORDER BY name ASC;
+SELECT * FROM hostels WHERE LOWER(id) = $1 OR LOWER(name) = $1 LIMIT 1;
+SELECT NOW() AS current_time;
+SELECT NOW() AS current_time, current_database() AS db_name;
+
+-- Atomic transaction control inside withTransaction
+BEGIN;
+COMMIT;
+ROLLBACK;</div>
+    <div class="query-notes">Basic health checking on <code>/api/health</code> and ACID transaction boundaries in <code>src/config/db.js</code>.</div>
+  </div>
+
+  <div class="footer-note">
+    MessLedger System Documentation &bull; Generated from Live Codebase &bull; Confidential & University Academic Use
+  </div>
+
+</body>
+</html>

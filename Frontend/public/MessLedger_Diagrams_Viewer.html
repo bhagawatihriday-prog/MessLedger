@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MessLedger — Database Diagrams & Architecture Hub</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    .tab-active { border-bottom: 3px solid #2563EB; color: #1D4ED8; font-weight: 700; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+  <!-- Top Navigation Bar -->
+  <header class="bg-slate-900 text-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center font-bold text-white text-lg shadow">
+          M
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight">MessLedger Diagram Hub</h1>
+          <p class="text-xs text-slate-400">PostgreSQL Schema & Architecture Visualizations</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-3">
+        <a href="MessLedger_Chen_Notation_Diagram.png" download="MessLedger_Chen_Notation_Diagram.png" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-md shadow transition flex items-center space-x-1.5">
+          <i class="fa-solid fa-download"></i>
+          <span>Download Chen PNG</span>
+        </a>
+        <a href="MessLedger_Chen_Notation_Diagram.pdf" download="MessLedger_Chen_Notation_Diagram.pdf" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-md shadow transition flex items-center space-x-1.5">
+          <i class="fa-solid fa-file-pdf"></i>
+          <span>Download Chen PDF</span>
+        </a>
+        <a href="MessLedger_Database_ERD.pdf" download="MessLedger_Database_ERD.pdf" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-semibold rounded-md transition flex items-center space-x-1.5">
+          <i class="fa-solid fa-file-lines"></i>
+          <span>Download 3-Page ERD</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <!-- Notice Banner -->
+    <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded-r-lg mb-6 shadow-sm flex items-start space-x-3">
+      <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 text-lg"></i>
+      <div class="text-sm text-blue-900">
+        <p class="font-bold">All diagram files are already saved directly on your computer!</p>
+        <p class="text-blue-700 mt-0.5">Location: <code class="bg-blue-100 px-1.5 py-0.5 rounded text-xs font-mono font-bold text-blue-950">c:\Users\Lenovo\OneDrive\Desktop\MessLedger\</code></p>
+      </div>
+    </div>
+
+    <!-- Tab Bar -->
+    <div class="flex border-b border-slate-200 mb-6 bg-white rounded-t-lg px-4 shadow-sm">
+      <button onclick="switchTab('chen')" id="tab-btn-chen" class="py-3 px-5 text-sm transition tab-active flex items-center space-x-2">
+        <i class="fa-solid fa-shapes text-blue-600"></i>
+        <span>1. Chen Notation Diagram</span>
+      </button>
+      <button onclick="switchTab('erd')" id="tab-btn-erd" class="py-3 px-5 text-sm transition text-slate-600 hover:text-slate-900 flex items-center space-x-2">
+        <i class="fa-solid fa-sitemap text-indigo-600"></i>
+        <span>2. Relational ERD Model (Crow's Foot)</span>
+      </button>
+      <button onclick="switchTab('files')" id="tab-btn-files" class="py-3 px-5 text-sm transition text-slate-600 hover:text-slate-900 flex items-center space-x-2">
+        <i class="fa-solid fa-folder-open text-amber-600"></i>
+        <span>3. Local File Browser & Direct Downloads</span>
+      </button>
+      <button onclick="switchTab('logos')" id="tab-btn-logos" class="py-3 px-5 text-sm transition text-slate-600 hover:text-slate-900 flex items-center space-x-2">
+        <i class="fa-solid fa-gem text-violet-600"></i>
+        <span>4. Brand Logo Suite (PNG)</span>
+      </button>
+    </div>
+
+    <!-- TAB 1: Chen Notation -->
+    <div id="tab-chen" class="space-y-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Peter Chen Conceptual ER Model</h2>
+          <p class="text-xs text-slate-500">Rectangles (Entities), Diamonds (Relationships), Ellipses (Attributes), Multi-Valued Double Rings</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <a href="MessLedger_Chen_Notation_Diagram.png" target="_blank" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded border border-slate-300">
+            <i class="fa-solid fa-up-right-from-square mr-1"></i> Open Fullscreen Image
+          </a>
+          <a href="MessLedger_Chen_Notation_Diagram.pdf" target="_blank" class="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-medium rounded border border-blue-200">
+            <i class="fa-solid fa-file-pdf mr-1"></i> Open PDF in Browser
+          </a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden">
+        <div class="p-2 bg-slate-100 border-b border-slate-200 flex justify-between items-center text-xs text-slate-600">
+          <span>High-Resolution 300 DPI Render</span>
+          <span>Right-click image &rarr; "Save image as..." to download anywhere</span>
+        </div>
+        <div class="overflow-auto max-h-[750px] p-2 bg-slate-50 flex justify-center">
+          <img src="MessLedger_Chen_Notation_Diagram.png" alt="MessLedger Chen Notation ER Diagram" class="max-w-none w-full shadow-inner rounded border border-slate-200">
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Relational ERD -->
+    <div id="tab-erd" class="hidden space-y-4">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-4 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Relational 3NF Database Specification</h2>
+          <p class="text-xs text-slate-500">Publication-quality 3-page architectural PDF (Normalized PostgreSQL Schema)</p>
+        </div>
+        <div class="flex items-center space-x-2">
+          <a href="MessLedger_Database_ERD.pdf" target="_blank" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded shadow">
+            <i class="fa-solid fa-up-right-from-square mr-1"></i> Open 3-Page PDF
+          </a>
+          <a href="MessLedger_Database_ERD.pdf" download="MessLedger_Database_ERD.pdf" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded border border-slate-300">
+            <i class="fa-solid fa-download mr-1"></i> Download PDF
+          </a>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow border border-slate-200 overflow-hidden">
+        <iframe src="MessLedger_Database_ERD.pdf" class="w-full h-[750px]" frameborder="0"></iframe>
+      </div>
+    </div>
+
+    <!-- TAB 3: Local Files & Download Links -->
+    <div id="tab-files" class="hidden space-y-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center text-xl mb-3">
+              <i class="fa-solid fa-image"></i>
+            </div>
+            <h3 class="font-bold text-slate-900">Chen Notation Diagram (PNG)</h3>
+            <p class="text-xs text-slate-500 mt-1">High-resolution 300 DPI image file ready for presentations, slides, and reports.</p>
+            <div class="mt-3 text-xs bg-slate-50 p-2 rounded border border-slate-200 font-mono text-slate-600 break-all">
+              MessLedger_Chen_Notation_Diagram.png
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-100 flex space-x-2">
+            <a href="MessLedger_Chen_Notation_Diagram.png" download="MessLedger_Chen_Notation_Diagram.png" class="w-full text-center py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded shadow transition">
+              <i class="fa-solid fa-download mr-1"></i> Download PNG
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center text-xl mb-3">
+              <i class="fa-solid fa-file-pdf"></i>
+            </div>
+            <h3 class="font-bold text-slate-900">Chen Notation Vector (PDF)</h3>
+            <p class="text-xs text-slate-500 mt-1">Lossless vector PDF document format for ultra-sharp infinite zoom and professional printing.</p>
+            <div class="mt-3 text-xs bg-slate-50 p-2 rounded border border-slate-200 font-mono text-slate-600 break-all">
+              MessLedger_Chen_Notation_Diagram.pdf
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-100 flex space-x-2">
+            <a href="MessLedger_Chen_Notation_Diagram.pdf" download="MessLedger_Chen_Notation_Diagram.pdf" class="w-full text-center py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded shadow transition">
+              <i class="fa-solid fa-download mr-1"></i> Download PDF
+            </a>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl mb-3">
+              <i class="fa-solid fa-book"></i>
+            </div>
+            <h3 class="font-bold text-slate-900">Database ERD & Specs (3 Pages)</h3>
+            <p class="text-xs text-slate-500 mt-1">Complete report including relational diagram, data dictionary, and security specifications.</p>
+            <div class="mt-3 text-xs bg-slate-50 p-2 rounded border border-slate-200 font-mono text-slate-600 break-all">
+              MessLedger_Database_ERD.pdf
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-100 flex space-x-2">
+            <a href="MessLedger_Database_ERD.pdf" download="MessLedger_Database_ERD.pdf" class="w-full text-center py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded shadow transition">
+              <i class="fa-solid fa-download mr-1"></i> Download 3-Page PDF
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: Logo Suite -->
+    <div id="tab-logos" class="hidden space-y-6">
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div>
+          <h2 class="text-base font-bold text-slate-900 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-violet-600"></span>
+            Official MessLedger Brand Logo Suite
+          </h2>
+          <p class="text-xs text-slate-500 mt-1">High-definition rasterized PNG assets (FinTech Monogram 'M' with Ledger Balance Bars & Typography)</p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <a href="messledger-logo.png" download="messledger-logo.png" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded shadow transition flex items-center gap-1.5">
+            <i class="fa-solid fa-download"></i>
+            <span>Main Logo (PNG)</span>
+          </a>
+          <a href="messledger-icon.png" download="messledger-icon.png" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold rounded shadow transition flex items-center gap-1.5">
+            <i class="fa-solid fa-cube"></i>
+            <span>App Icon (1024x1024)</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Grid of Logo Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- 1. Primary Horizontal Logo (Transparent) -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+          <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">1. Primary Horizontal Logo</h3>
+              <p class="text-xs text-slate-500">Transparent background • Dark typography</p>
+            </div>
+            <span class="px-2 py-0.5 bg-blue-50 text-blue-700 text-[11px] font-mono font-medium rounded">2400x600</span>
+          </div>
+          <div class="p-8 bg-slate-100 flex items-center justify-center min-h-[180px]">
+            <img src="messledger-logo.png" alt="MessLedger Logo" class="max-h-24 w-auto object-contain">
+          </div>
+          <div class="p-4 bg-white border-t border-slate-100 flex items-center justify-between">
+            <code class="text-xs text-slate-600 font-mono">messledger-logo.png</code>
+            <a href="messledger-logo.png" download="messledger-logo.png" class="px-3 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold rounded border border-blue-200 transition">
+              <i class="fa-solid fa-download mr-1"></i> Download
+            </a>
+          </div>
+        </div>
+
+        <!-- 2. Dark Mode Horizontal Logo -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+          <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">2. Dark Mode Logo</h3>
+              <p class="text-xs text-slate-500">Zinc dark container • Luminous typography</p>
+            </div>
+            <span class="px-2 py-0.5 bg-zinc-100 text-zinc-700 text-[11px] font-mono font-medium rounded">Dark Card</span>
+          </div>
+          <div class="p-8 bg-slate-950 flex items-center justify-center min-h-[180px]">
+            <img src="messledger-logo-dark.png" alt="MessLedger Dark Logo" class="max-h-24 w-auto object-contain">
+          </div>
+          <div class="p-4 bg-white border-t border-slate-100 flex items-center justify-between">
+            <code class="text-xs text-slate-600 font-mono">messledger-logo-dark.png</code>
+            <a href="messledger-logo-dark.png" download="messledger-logo-dark.png" class="px-3 py-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-semibold rounded border border-zinc-300 transition">
+              <i class="fa-solid fa-download mr-1"></i> Download
+            </a>
+          </div>
+        </div>
+
+        <!-- 3. High-Res App Icon (Squircle Badge) -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+          <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">3. App Icon / Profile Avatar</h3>
+              <p class="text-xs text-slate-500">1024x1024 squircle • App store, PWA & Favicon</p>
+            </div>
+            <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[11px] font-mono font-medium rounded">1024x1024</span>
+          </div>
+          <div class="p-8 bg-slate-50 flex items-center justify-center min-h-[220px]">
+            <img src="messledger-icon.png" alt="MessLedger Icon" class="w-36 h-36 rounded-2xl shadow-md object-contain">
+          </div>
+          <div class="p-4 bg-white border-t border-slate-100 flex items-center justify-between">
+            <code class="text-xs text-slate-600 font-mono">messledger-icon.png</code>
+            <a href="messledger-icon.png" download="messledger-icon.png" class="px-3 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-semibold rounded border border-emerald-200 transition">
+              <i class="fa-solid fa-download mr-1"></i> Download (1024px)
+            </a>
+          </div>
+        </div>
+
+        <!-- 4. Pure Brandmark (No Subtitle) -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between">
+          <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900">4. Clean Brandmark</h3>
+              <p class="text-xs text-slate-500">Badge + Typography only (matching Header / Navbar)</p>
+            </div>
+            <span class="px-2 py-0.5 bg-violet-50 text-violet-700 text-[11px] font-mono font-medium rounded">Compact</span>
+          </div>
+          <div class="p-8 bg-slate-100 flex items-center justify-center min-h-[220px]">
+            <img src="messledger-brandmark.png" alt="MessLedger Brandmark" class="max-h-20 w-auto object-contain">
+          </div>
+          <div class="p-4 bg-white border-t border-slate-100 flex items-center justify-between">
+            <code class="text-xs text-slate-600 font-mono">messledger-brandmark.png</code>
+            <a href="messledger-brandmark.png" download="messledger-brandmark.png" class="px-3 py-1 bg-violet-50 hover:bg-violet-100 text-violet-700 text-xs font-semibold rounded border border-violet-200 transition">
+              <i class="fa-solid fa-download mr-1"></i> Download
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    function switchTab(tabId) {
+      document.getElementById('tab-chen').classList.add('hidden');
+      document.getElementById('tab-erd').classList.add('hidden');
+      document.getElementById('tab-files').classList.add('hidden');
+      document.getElementById('tab-logos').classList.add('hidden');
+
+      document.getElementById('tab-btn-chen').className = 'py-3 px-5 text-sm transition text-slate-600 hover:text-slate-900 flex items-center space-x-2';
+      document.getElementById('tab-btn-erd').className = 'py-3 px-5 text-sm transition text-slate-600 hover:text-slate-900 flex items-center space-x-2';
+      document.getElementById('tab-btn-files').className = 'py-3 px-5 text-sm transition text-slate-600 hover:text-slate-900 flex items-center space-x-2';
+      document.getElementById('tab-btn-logos').className = 'py-3 px-5 text-sm transition text-slate-600 hover:text-slate-900 flex items-center space-x-2';
+
+      if (tabId === 'chen') {
+        document.getElementById('tab-chen').classList.remove('hidden');
+        document.getElementById('tab-btn-chen').className = 'py-3 px-5 text-sm transition tab-active flex items-center space-x-2';
+      } else if (tabId === 'erd') {
+        document.getElementById('tab-erd').classList.remove('hidden');
+        document.getElementById('tab-btn-erd').className = 'py-3 px-5 text-sm transition tab-active flex items-center space-x-2';
+      } else if (tabId === 'files') {
+        document.getElementById('tab-files').classList.remove('hidden');
+        document.getElementById('tab-btn-files').className = 'py-3 px-5 text-sm transition tab-active flex items-center space-x-2';
+      } else if (tabId === 'logos') {
+        document.getElementById('tab-logos').classList.remove('hidden');
+        document.getElementById('tab-btn-logos').className = 'py-3 px-5 text-sm transition tab-active flex items-center space-x-2';
+      }
+    }
+  </script>
+</body>
+</html>
+

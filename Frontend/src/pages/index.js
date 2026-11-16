@@ -1,0 +1,11 @@
+export { Login } from './Login';
+export { AdminRegister } from './AdminRegister';
+export { Dashboard } from './Dashboard';
+export { Payment } from './Payment';
+export { EditProfile } from './EditProfile';
+export { Settings } from './Settings';
+export { Notifications } from './Notifications';
+export { AdminDashboard } from './AdminDashboard';
+export { AdminBoarders } from './AdminBoarders';
+export { Unauthorized } from './Unauthorized';
+export { NotFound } from './NotFound';
