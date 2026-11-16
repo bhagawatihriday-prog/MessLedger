@@ -9,6 +9,16 @@ export const GoogleButton = ({
   className = '',
 }) => {
   const containerRef = useRef(null);
+  const isInitializedRef = useRef(false);
+  const onSuccessRef = useRef(onSuccess);
+  const onErrorRef = useRef(onError);
+
+  // Keep callback refs fresh without causing re-initialization
+  useEffect(() => {
+    onSuccessRef.current = onSuccess;
+    onErrorRef.current = onError;
+  }, [onSuccess, onError]);
+
   const [isGsiLoaded, setIsGsiLoaded] = useState(false);
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const isClientConfigured = Boolean(
@@ -46,6 +56,7 @@ export const GoogleButton = ({
 
   useEffect(() => {
     if (!isGsiLoaded || !isClientConfigured || !containerRef.current) return;
+    if (isInitializedRef.current) return; // Prevent multiple initializations
 
     try {
       const isDark = document.documentElement.classList.contains('dark');
@@ -54,12 +65,14 @@ export const GoogleButton = ({
         client_id: clientId,
         callback: (response) => {
           if (response?.credential) {
-            onSuccess?.(response.credential);
+            onSuccessRef.current?.(response.credential);
           } else {
-            onError?.(new Error('Google authentication did not return a valid credential.'));
+            onErrorRef.current?.(new Error('Google authentication did not return a valid credential.'));
           }
         },
       });
+
+      isInitializedRef.current = true;
 
       // Render official Google button inside container
       window.google.accounts.id.renderButton(containerRef.current, {
@@ -74,34 +87,37 @@ export const GoogleButton = ({
     } catch (err) {
       console.warn('Failed to render Google Identity Services button:', err);
     }
-  }, [isGsiLoaded, isClientConfigured, clientId, onSuccess, onError]);
+  }, [isGsiLoaded, isClientConfigured, clientId]);
 
   const handleCustomClick = () => {
     if (!isClientConfigured) {
       const msg = 'Google Client ID is not configured yet. Please set VITE_GOOGLE_CLIENT_ID in Frontend/.env with your Google Cloud Console credentials.';
       console.warn(msg);
-      onError?.(new Error(msg));
+      onErrorRef.current?.(new Error(msg));
       return;
     }
 
     if (window.google?.accounts?.id) {
       try {
-        window.google.accounts.id.initialize({
-          client_id: clientId,
-          callback: (response) => {
-            if (response?.credential) {
-              onSuccess?.(response.credential);
-            } else {
-              onError?.(new Error('Google authentication did not return a credential.'));
-            }
-          },
-        });
+        if (!isInitializedRef.current) {
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: (response) => {
+              if (response?.credential) {
+                onSuccessRef.current?.(response.credential);
+              } else {
+                onErrorRef.current?.(new Error('Google authentication did not return a credential.'));
+              }
+            },
+          });
+          isInitializedRef.current = true;
+        }
         window.google.accounts.id.prompt();
       } catch (err) {
-        onError?.(err);
+        onErrorRef.current?.(err);
       }
     } else {
-      onError?.(new Error('Google Sign-In SDK is still loading. Please try again in a moment.'));
+      onErrorRef.current?.(new Error('Google Sign-In SDK is still loading. Please try again in a moment.'));
     }
   };
 
