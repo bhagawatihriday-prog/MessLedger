@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Bell,
   Trash2,
@@ -6,6 +7,7 @@ import {
   ShieldAlert,
   ShieldCheck,
   AlertTriangle,
+  LogOut,
 } from 'lucide-react';
 import { useAuth, useToast } from '../context';
 import { PageContainer } from '../components/PageContainer';
@@ -14,8 +16,14 @@ import { Modal } from '../components/Modal';
 import { userService } from '../services/userService';
 
 export const Settings = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const [billAlerts, setBillAlerts] = useState(true);
   const [fineReminders, setFineReminders] = useState(true);
@@ -181,6 +189,31 @@ export const Settings = () => {
               </div>
             </div>
           )}
+        </div>
+
+        {/* 4. Session & Sign Out */}
+        <div className="card-base p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <LogOut className="w-4 h-4 text-zinc-900 dark:text-zinc-100" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                Session & Sign Out
+              </h3>
+            </div>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Signed in as <span className="font-semibold text-zinc-900 dark:text-zinc-100">{user?.name}</span> ({user?.email})
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            icon={LogOut}
+            onClick={handleLogout}
+            className="text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30 w-full sm:w-auto justify-center"
+          >
+            Sign Out
+          </Button>
         </div>
       </div>
 

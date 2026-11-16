@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { User, Mail, Hash, Building2, DoorClosed, Phone, Lock, Briefcase, ShieldCheck, GraduationCap } from 'lucide-react';
+import { User, Mail, Hash, Building2, DoorClosed, Phone, Lock, Briefcase, ShieldCheck, GraduationCap, LogOut } from 'lucide-react';
 import { profileUpdateSchema } from '../utils/validators';
 import { useAuth, useToast } from '../context';
 import { PageContainer } from '../components/PageContainer';
@@ -11,9 +12,15 @@ import { Button } from '../components/Button';
 import { DEPARTMENTS } from '../utils/constants';
 
 export const EditProfile = () => {
-  const { user, updateUser } = useAuth();
+  const { user, updateUser, logout } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [avatarUrl, setAvatarUrl] = useState(user?.profilePicture || '');
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SENIOR_WARDEN' || user?.role === 'WARDEN';
 
@@ -223,6 +230,31 @@ export const EditProfile = () => {
               </Button>
             </div>
           </form>
+        </div>
+
+        {/* Account Session & Sign Out */}
+        <div className="card-base p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <LogOut className="w-4 h-4 text-zinc-900 dark:text-zinc-100" />
+              <h3 className="text-xs font-bold uppercase tracking-wider text-zinc-700 dark:text-zinc-300">
+                Account Session
+              </h3>
+            </div>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400">
+              Signed in as <span className="font-semibold text-zinc-950 dark:text-zinc-50">{user?.name}</span> ({user?.email})
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            icon={LogOut}
+            onClick={handleLogout}
+            className="text-rose-600 dark:text-rose-400 border-rose-200 dark:border-rose-900/50 hover:bg-rose-50 dark:hover:bg-rose-950/30 w-full sm:w-auto justify-center"
+          >
+            Sign Out
+          </Button>
         </div>
       </div>
     </PageContainer>
