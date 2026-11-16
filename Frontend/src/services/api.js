@@ -3,9 +3,16 @@ import axios from 'axios';
 // Determine if running in mock mode
 export const isMockMode = import.meta.env.VITE_USE_MOCK !== 'false';
 
+// Normalize API base URL to guarantee /api suffix
+const getBaseURL = () => {
+  const envUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+  if (!envUrl) return '/api';
+  return envUrl.endsWith('/api') ? envUrl : `${envUrl.replace(/\/+$/, '')}/api`;
+};
+
 // Base Axios instance
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
+  baseURL: getBaseURL(),
   timeout: 10000,
   withCredentials: true,
   headers: {
