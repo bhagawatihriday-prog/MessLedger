@@ -3,15 +3,25 @@ import { query } from '../config/db.js';
 /**
  * Format notification row to frontend model
  */
-export const formatNotification = (row) => ({
-  id: row.id,
-  userId: row.user_id,
-  title: row.title,
-  message: row.message,
-  type: row.type || 'INFO',
-  isRead: !!row.is_read,
-  createdAt: row.created_at,
-});
+export const formatNotification = (row) => {
+  let link = null;
+  const upperType = (row.type || 'INFO').toUpperCase();
+  if (upperType === 'BILL') link = '/login/dashboard/payment';
+  else if (upperType === 'PAYMENT') link = '/login/dashboard';
+  else if (upperType === 'REBATE') link = '/login/dashboard';
+
+  return {
+    id: row.id,
+    userId: row.user_id,
+    title: row.title,
+    message: row.message,
+    type: upperType,
+    isRead: !!row.is_read,
+    createdAt: row.created_at,
+    timestamp: row.created_at,
+    link,
+  };
+};
 
 /**
  * GET /api/notifications

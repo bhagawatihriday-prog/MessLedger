@@ -273,7 +273,7 @@ export const AdminDashboard = () => {
   const [rebateForm, setRebateForm] = useState({
     calcMode: 'DAYS', // 'DAYS' | 'CUSTOM'
     days: 3,
-    customAmount: 345,
+    customAmount: '',
     appRef: '',
     reasonCategory: 'VACATION',
     fromDate: '',
@@ -339,7 +339,7 @@ export const AdminDashboard = () => {
     setRebateForm({
       calcMode: existingDays > 0 ? 'DAYS' : 'CUSTOM',
       days: existingDays || 3,
-      customAmount: existingRebate || (3 * dailyRate),
+      customAmount: existingRebate > 0 ? String(existingRebate) : '',
       appRef: b.rebateApplicationRef || '',
       reasonCategory: b.rebateCategory || 'VACATION',
       fromDate: b.rebateFromDate || '',
@@ -1089,7 +1089,7 @@ export const AdminDashboard = () => {
                   </div>
 
                   {/* Card Actions */}
-                  <div className="flex items-center justify-between gap-2 pt-1 border-t border-zinc-100 dark:border-zinc-850">
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-850">
                     <button
                       type="button"
                       onClick={() => setSelectedStudent(st)}
@@ -1099,25 +1099,37 @@ export const AdminDashboard = () => {
                       <span>Itemized Breakdown</span>
                     </button>
 
-                    {st.breakdown?.dietRebate < 0 ? (
+                    <div className="flex items-center gap-1.5">
                       <button
                         type="button"
-                        onClick={() => handleOpenRebateModal(st)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
+                        onClick={() => setDeletingAccountStudent(st)}
+                        title="Delete resident user account"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium text-rose-600 dark:text-rose-400 border border-rose-200 dark:border-rose-900/60 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
                       >
-                        <Tag className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-                        <span>Rebate {formatCurrency(st.breakdown.dietRebate)}</span>
+                        <UserX className="w-3 h-3" />
+                        <span>Delete User</span>
                       </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => handleOpenRebateModal(st)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
-                      >
-                        <Plus className="w-3 h-3" />
-                        <span>+ Rebate</span>
-                      </button>
-                    )}
+
+                      {st.breakdown?.dietRebate < 0 ? (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenRebateModal(st)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800"
+                        >
+                          <Tag className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                          <span>Rebate {formatCurrency(st.breakdown.dietRebate)}</span>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => handleOpenRebateModal(st)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 border border-zinc-200 dark:border-zinc-700"
+                        >
+                          <Plus className="w-3 h-3" />
+                          <span>+ Rebate</span>
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))
@@ -1252,7 +1264,16 @@ export const AdminDashboard = () => {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setRebateForm({ ...rebateForm, calcMode: 'CUSTOM' })}
+                  onClick={() =>
+                    setRebateForm({
+                      ...rebateForm,
+                      calcMode: 'CUSTOM',
+                      customAmount:
+                        rebateForm.customAmount && Number(rebateForm.customAmount) > 0
+                          ? String(rebateForm.customAmount).replace(/^0+(?=\d)/, '')
+                          : (rebateForm.days && Number(rebateForm.days) > 0 ? String(Number(rebateForm.days) * currentDailyRate) : ''),
+                    })
+                  }
                   className={`py-1.5 px-3 rounded-lg text-xs font-medium border text-center transition-colors ${rebateForm.calcMode === 'CUSTOM'
                     ? 'bg-zinc-950 text-white border-zinc-950 dark:bg-zinc-100 dark:text-zinc-950 dark:border-zinc-100 shadow-xs'
                     : 'bg-white dark:bg-zinc-900 text-zinc-700 dark:text-zinc-300 border-zinc-300 dark:border-zinc-700 hover:bg-zinc-50'
@@ -1271,7 +1292,7 @@ export const AdminDashboard = () => {
                     Number of Approved Absence Days
                   </label>
                   <span className="text-[11px] text-zinc-500 font-mono">
-                    {rebateForm.days} days × ₹{currentDailyRate} = <strong>{formatCurrency(computedRebateAmount)}</strong>
+                    {rebateForm.days || 0} days × ₹{currentDailyRate} = <strong>{formatCurrency(computedRebateAmount)}</strong>
                   </span>
                 </div>
                 <input
@@ -1279,9 +1300,15 @@ export const AdminDashboard = () => {
                   min="1"
                   max="31"
                   value={rebateForm.days}
-                  onChange={(e) =>
-                    setRebateForm({ ...rebateForm, days: Math.max(1, parseInt(e.target.value, 10) || 0) })
-                  }
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (raw === '') {
+                      setRebateForm({ ...rebateForm, days: '' });
+                      return;
+                    }
+                    const sanitized = raw.replace(/^0+(?=\d)/, '');
+                    setRebateForm({ ...rebateForm, days: sanitized });
+                  }}
                   placeholder="e.g. 4"
                   className="w-full px-3 py-2 text-xs rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-950 dark:focus:ring-zinc-100"
                 />
@@ -1293,7 +1320,7 @@ export const AdminDashboard = () => {
                     Flat Rebate Amount (₹)
                   </label>
                   <span className="text-[11px] text-zinc-500">
-                    ≈ {Math.round(computedRebateAmount / currentDailyRate)} days equivalent
+                    ≈ {currentDailyRate > 0 ? Math.round(computedRebateAmount / currentDailyRate) : 0} days equivalent
                   </span>
                 </div>
                 <input
@@ -1301,9 +1328,15 @@ export const AdminDashboard = () => {
                   min="1"
                   step="10"
                   value={rebateForm.customAmount}
-                  onChange={(e) =>
-                    setRebateForm({ ...rebateForm, customAmount: Math.max(0, parseInt(e.target.value, 10) || 0) })
-                  }
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    if (raw === '') {
+                      setRebateForm({ ...rebateForm, customAmount: '' });
+                      return;
+                    }
+                    const sanitized = raw.replace(/^0+(?=\d)/, '');
+                    setRebateForm({ ...rebateForm, customAmount: sanitized });
+                  }}
                   placeholder="e.g. 500"
                   className="w-full px-3 py-2 text-xs rounded-lg border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-1 focus:ring-zinc-950 dark:focus:ring-zinc-100"
                 />
@@ -1435,6 +1468,32 @@ export const AdminDashboard = () => {
           title="Itemized Billing Breakdown"
           subtitle={`${selectedStudent.name} (${selectedStudent.rollNo}) • Room ${selectedStudent.room}, ${(selectedStudent.hostel || '').toUpperCase()}`}
           maxWidth="max-w-xl"
+          footer={
+            <div className="flex items-center justify-between w-full">
+              <Button
+                type="button"
+                variant="danger"
+                size="sm"
+                icon={UserX}
+                onClick={() => {
+                  const target = selectedStudent;
+                  setSelectedStudent(null);
+                  setDeletingAccountStudent(target);
+                }}
+                className="text-xs"
+              >
+                Delete Student Account
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setSelectedStudent(null)}
+              >
+                Close
+              </Button>
+            </div>
+          }
         >
           <div className="space-y-4">
             {/* Quick Status Bar & Assigned Room */}

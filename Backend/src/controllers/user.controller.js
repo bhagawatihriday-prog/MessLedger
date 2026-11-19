@@ -1,4 +1,5 @@
 import { query } from '../config/db.js';
+import { appCache } from '../utils/cache.js';
 
 /**
  * GET /api/user/profile
@@ -65,6 +66,9 @@ export const updateProfile = async (req, res) => {
       avatarUrl: row.avatar_url,
       joinedDate: row.created_at ? new Date(row.created_at).toISOString().split('T')[0] : '',
     };
+
+    // Invalidate cached auth profile for this user
+    appCache.delPrefix(`auth:${userId}`);
 
     return res.json({
       success: true,
@@ -151,6 +155,11 @@ export const deleteUser = async (req, res) => {
 
     // Delete user (associated bills, payments, and notifications cascade via ON DELETE CASCADE)
     await query('DELETE FROM users WHERE id = $1', [targetUser.id]);
+
+    // Invalidate cached auth & hostel state
+    appCache.delPrefix(`auth:${targetUser.id}`);
+    appCache.del('hostels:all');
+    appCache.delPrefix('hostels:');
 
     // If admin is somehow deleting their own logged-in admin account, clear the cookie
     if (req.user.id === targetUser.id) {
@@ -281,6 +290,11 @@ export const updateStudentRoom = async (req, res) => {
       ]
     );
 
+    // Invalidate cached auth & hostel directory
+    appCache.delPrefix(`auth:${id}`);
+    appCache.del('hostels:all');
+    appCache.delPrefix('hostels:');
+
     return res.json({
       success: true,
       message: `Successfully reallocated ${updatedStudent.name} (${updatedStudent.roll_no || 'Student'}) to Room ${cleanRoom}.`,
@@ -339,6 +353,11 @@ export const deleteUsersBulk = async (req, res) => {
     sql += ` RETURNING id, name, roll_no, email, hostel`;
 
     const result = await query(sql, params);
+
+    // Invalidate cached auth & hostel directory
+    appCache.delPrefix('auth:');
+    appCache.del('hostels:all');
+    appCache.delPrefix('hostels:');
 
     return res.json({
       success: true,

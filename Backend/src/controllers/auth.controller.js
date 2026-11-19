@@ -1,20 +1,77 @@
+import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 import { query } from '../config/db.js';
+import { appCache } from '../utils/cache.js';
 
 const JWT_SECRET = (process.env.JWT_SECRET || 'messledger_jwt_secret_key_2026').trim();
 const ADMIN_INVITE_TOKEN = process.env.ADMIN_INVITE_TOKEN || 'MESS_ADMIN_2026';
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
+export const ACCESS_TOKEN_EXPIRY = '15m';
+export const REFRESH_TOKEN_EXPIRY = '7d';
+export const REFRESH_TOKEN_MS = 7 * 24 * 60 * 60 * 1000;
+
 /**
  * Cookie options for secure, HTTP-only JWT storage
  */
-export const COOKIE_OPTIONS = {
+export const ACCESS_COOKIE_OPTIONS = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
   sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  maxAge: 15 * 60 * 1000, // 15 minutes
+};
+
+export const REFRESH_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  maxAge: REFRESH_TOKEN_MS, // 7 days
+  path: '/',
+};
+
+export const COOKIE_OPTIONS = ACCESS_COOKIE_OPTIONS;
+
+export const hashToken = (token) => {
+  return crypto.createHash('sha256').update(token).digest('hex');
+};
+
+/**
+ * Creates a persisted session in database and generates signed access & refresh tokens
+ */
+export const createSessionAndTokens = async (user, req) => {
+  const sessionId = `sess_${Date.now()}_${crypto.randomBytes(6).toString('hex')}`;
+  const userAgent = req.headers['user-agent'] || 'Unknown Device';
+  const ipAddress = (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || req.ip || '127.0.0.1').split(',')[0].trim();
+  const expiresAt = new Date(Date.now() + REFRESH_TOKEN_MS);
+
+  const accessToken = jwt.sign(
+    { id: user.id, email: user.email, role: user.role, sessionId },
+    JWT_SECRET,
+    { expiresIn: ACCESS_TOKEN_EXPIRY }
+  );
+
+  const refreshToken = jwt.sign(
+    { id: user.id, sessionId },
+    JWT_SECRET,
+    { expiresIn: REFRESH_TOKEN_EXPIRY }
+  );
+
+  const refreshTokenHash = hashToken(refreshToken);
+
+  try {
+    await query(
+      `INSERT INTO user_sessions (
+        id, user_id, refresh_token_hash, user_agent, ip_address, expires_at
+      ) VALUES ($1, $2, $3, $4, $5, $6)`,
+      [sessionId, user.id, refreshTokenHash, userAgent, ipAddress, expiresAt]
+    );
+  } catch (err) {
+    console.warn('[SESSION INSERT WARNING]', err.message);
+  }
+
+  return { accessToken, refreshToken, sessionId };
 };
 
 /**
@@ -164,19 +221,18 @@ export const register = async (req, res) => {
     );
 
     const newUser = insertRes.rows[0];
-    const token = jwt.sign(
-      { id: newUser.id, email: newUser.email, role: newUser.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const { accessToken, refreshToken } = await createSessionAndTokens(newUser, req);
 
-    res.cookie('token', token, COOKIE_OPTIONS);
+    res.cookie('token', accessToken, ACCESS_COOKIE_OPTIONS);
+    res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
 
     return res.status(201).json({
       success: true,
       message: 'Account registered and hostel residency verified successfully.',
       user: formatUserResponse(newUser),
-      token,
+      token: accessToken,
+      accessToken,
+      refreshToken,
     });
   } catch (error) {
     console.error('[REGISTER ERROR]', error);
@@ -268,14 +324,13 @@ export const adminRegister = async (req, res) => {
           [newAdmin.id, resolvedHostelId]
         );
       }
+      appCache.del('hostels:all');
+      appCache.delPrefix('hostels:');
     }
-    const token = jwt.sign(
-      { id: newAdmin.id, email: newAdmin.email, role: newAdmin.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const { accessToken, refreshToken } = await createSessionAndTokens(newAdmin, req);
 
-    res.cookie('token', token, COOKIE_OPTIONS);
+    res.cookie('token', accessToken, ACCESS_COOKIE_OPTIONS);
+    res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
 
     return res.status(201).json({
       success: true,
@@ -284,7 +339,9 @@ export const adminRegister = async (req, res) => {
         ...formatUserResponse(newAdmin),
         designation: officialDesignation,
       },
-      token,
+      token: accessToken,
+      accessToken,
+      refreshToken,
     });
   } catch (error) {
     console.error('[ADMIN REGISTER ERROR]', error);
@@ -425,19 +482,18 @@ export const login = async (req, res) => {
       });
     }
 
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    const { accessToken, refreshToken } = await createSessionAndTokens(user, req);
 
-    res.cookie('token', token, COOKIE_OPTIONS);
+    res.cookie('token', accessToken, ACCESS_COOKIE_OPTIONS);
+    res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
 
     return res.json({
       success: true,
       message: 'Logged in successfully.',
       user: formatUserResponse(user),
-      token,
+      token: accessToken,
+      accessToken,
+      refreshToken,
     });
   } catch (error) {
     console.error('[LOGIN ERROR]', error);
@@ -627,20 +683,19 @@ export const googleAuth = async (req, res) => {
 
     }
 
-    // 3. Issue signed JWT session token
-    const token = jwt.sign(
-      { id: user.id, email: user.email, role: user.role },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
+    // 3. Issue signed JWT session tokens and record session
+    const { accessToken, refreshToken } = await createSessionAndTokens(user, req);
 
-    res.cookie('token', token, COOKIE_OPTIONS);
+    res.cookie('token', accessToken, ACCESS_COOKIE_OPTIONS);
+    res.cookie('refreshToken', refreshToken, REFRESH_COOKIE_OPTIONS);
 
     return res.json({
       success: true,
       message: 'Authenticated with Google successfully.',
       user: formatUserResponse(user),
-      token,
+      token: accessToken,
+      accessToken,
+      refreshToken,
     });
   } catch (error) {
     console.error('[GOOGLE AUTH ERROR]', error);
@@ -664,18 +719,237 @@ export const getMe = (req, res) => {
 };
 
 /**
- * POST /api/auth/logout
- * Clears authentication cookie and terminates session
+ * POST /api/auth/refresh
+ * Rotates refresh token, validates session, and issues fresh access token
  */
-export const logout = (req, res) => {
-  res.clearCookie('token', {
-    ...COOKIE_OPTIONS,
-    maxAge: 0,
-  });
-  return res.json({
-    success: true,
-    message: 'Logged out successfully.',
-  });
+export const refreshSession = async (req, res) => {
+  try {
+    let token = req.cookies?.refreshToken || req.body?.refreshToken || req.headers['x-refresh-token'];
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: 'Refresh token is missing. Please sign in.',
+      });
+    }
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, JWT_SECRET);
+    } catch (jwtErr) {
+      return res.status(401).json({
+        success: false,
+        message: 'Refresh token has expired or is invalid. Please sign in.',
+      });
+    }
+
+    const { id: userId, sessionId } = decoded;
+    if (!sessionId) {
+      return res.status(401).json({
+        success: false,
+        message: 'Malformed session token.',
+      });
+    }
+
+    // Look up active session in user_sessions table
+    const sessionRes = await query(
+      `SELECT * FROM user_sessions WHERE id = $1 AND user_id = $2 LIMIT 1`,
+      [sessionId, userId]
+    );
+
+    if (sessionRes.rows.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: 'Session not found. Please log in again.',
+      });
+    }
+
+    const session = sessionRes.rows[0];
+
+    // Check if revoked or expired
+    if (session.is_revoked || new Date(session.expires_at) < new Date()) {
+      return res.status(401).json({
+        success: false,
+        message: 'Session has been revoked or expired. Please sign in again.',
+      });
+    }
+
+    // Check token hash to protect against replay / stolen token attacks
+    const providedHash = hashToken(token);
+    if (session.refresh_token_hash !== providedHash) {
+      // Suspected token reuse attack: revoke the entire session family
+      await query('UPDATE user_sessions SET is_revoked = TRUE WHERE id = $1', [sessionId]);
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid session token. Session revoked for security.',
+      });
+    }
+
+    // Fetch user profile
+    const userRes = await query(
+      'SELECT id, name, email, role, designation, hostel, room, roll_no, phone, department, avatar_url, created_at FROM users WHERE id = $1',
+      [userId]
+    );
+
+    if (userRes.rows.length === 0) {
+      return res.status(401).json({
+        success: false,
+        message: 'User account not found.',
+      });
+    }
+
+    const user = userRes.rows[0];
+
+    // Rotate tokens
+    const newAccessToken = jwt.sign(
+      { id: user.id, email: user.email, role: user.role, sessionId },
+      JWT_SECRET,
+      { expiresIn: ACCESS_TOKEN_EXPIRY }
+    );
+
+    const newRefreshToken = jwt.sign(
+      { id: user.id, sessionId },
+      JWT_SECRET,
+      { expiresIn: REFRESH_TOKEN_EXPIRY }
+    );
+
+    const newHash = hashToken(newRefreshToken);
+    const newExpiresAt = new Date(Date.now() + REFRESH_TOKEN_MS);
+
+    // Update DB session record
+    await query(
+      `UPDATE user_sessions 
+       SET refresh_token_hash = $1, 
+           last_active_at = CURRENT_TIMESTAMP, 
+           expires_at = $2 
+       WHERE id = $3`,
+      [newHash, newExpiresAt, sessionId]
+    );
+
+    // Invalidate stale cached auth context
+    appCache.del(`auth:${userId}:${sessionId}`);
+
+    res.cookie('token', newAccessToken, ACCESS_COOKIE_OPTIONS);
+    res.cookie('refreshToken', newRefreshToken, REFRESH_COOKIE_OPTIONS);
+
+    return res.json({
+      success: true,
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken,
+      token: newAccessToken,
+      user: formatUserResponse(user),
+    });
+  } catch (error) {
+    console.error('[REFRESH SESSION ERROR]', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to refresh session.',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * POST /api/auth/logout
+ * Clears authentication cookies and revokes active session in database
+ */
+export const logout = async (req, res) => {
+  try {
+    let sessionId = req.sessionId;
+    let userId = req.user?.id;
+    if (!sessionId) {
+      const token = req.cookies?.refreshToken || req.body?.refreshToken;
+      if (token) {
+        try {
+          const dec = jwt.verify(token, JWT_SECRET);
+          sessionId = dec.sessionId;
+          userId = userId || dec.id;
+        } catch {}
+      }
+    }
+
+    if (sessionId) {
+      await query('UPDATE user_sessions SET is_revoked = TRUE WHERE id = $1', [sessionId]);
+    }
+
+    // Invalidate cached auth states for this user / session
+    if (userId) {
+      appCache.delPrefix(`auth:${userId}`);
+    } else if (sessionId) {
+      appCache.delPrefix('auth:');
+    }
+
+    res.clearCookie('token', ACCESS_COOKIE_OPTIONS);
+    res.clearCookie('refreshToken', REFRESH_COOKIE_OPTIONS);
+
+    return res.json({
+      success: true,
+      message: 'Logged out and session terminated successfully.',
+    });
+  } catch (err) {
+    console.error('[LOGOUT ERROR]', err);
+    return res.json({ success: true, message: 'Logged out.' });
+  }
+};
+
+/**
+ * GET /api/auth/sessions
+ * Returns all active sessions for current user
+ */
+export const getActiveSessions = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const result = await query(
+      `SELECT id, user_agent, ip_address, is_revoked, created_at, expires_at, last_active_at
+       FROM user_sessions
+       WHERE user_id = $1 AND is_revoked = FALSE AND expires_at > CURRENT_TIMESTAMP
+       ORDER BY last_active_at DESC
+       LIMIT 20`,
+      [userId]
+    );
+
+    const sessions = result.rows.map((s) => ({
+      id: s.id,
+      userAgent: s.user_agent,
+      ipAddress: s.ip_address,
+      createdAt: s.created_at,
+      lastActiveAt: s.last_active_at,
+      isCurrent: s.id === req.sessionId,
+    }));
+
+    return res.json({ success: true, sessions });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+/**
+ * DELETE /api/auth/sessions/:sessionId
+ * Revokes a specific session or all other sessions
+ */
+export const revokeSession = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { sessionId } = req.params;
+
+    if (sessionId === 'all-others') {
+      await query(
+        'UPDATE user_sessions SET is_revoked = TRUE WHERE user_id = $1 AND id != $2',
+        [userId, req.sessionId || '']
+      );
+      appCache.delPrefix(`auth:${userId}`);
+      return res.json({ success: true, message: 'All other active sessions revoked.' });
+    }
+
+    await query(
+      'UPDATE user_sessions SET is_revoked = TRUE WHERE id = $1 AND user_id = $2',
+      [sessionId, userId]
+    );
+    appCache.delPrefix(`auth:${userId}`);
+    return res.json({ success: true, message: 'Session revoked successfully.' });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
 };
 
 export default {
@@ -683,7 +957,10 @@ export default {
   adminRegister,
   login,
   googleAuth,
+  refreshSession,
   logout,
   getMe,
+  getActiveSessions,
+  revokeSession,
   formatUserResponse,
 };

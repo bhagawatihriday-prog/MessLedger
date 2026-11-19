@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Bell, Check, Clock, AlertCircle } from 'lucide-react';
 import { notificationService } from '../services/notificationService';
 import { formatRelativeTime } from '../utils/formatDate';
@@ -9,6 +9,7 @@ export const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const dropdownRef = useRef(null);
+  const navigate = useNavigate();
 
   const fetchNotifications = async () => {
     try {
@@ -23,6 +24,9 @@ export const NotificationBell = () => {
 
   useEffect(() => {
     fetchNotifications();
+    // Auto-refresh every 30 seconds to keep unread badges live
+    const interval = setInterval(fetchNotifications, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   // Close when clicking outside
@@ -40,12 +44,15 @@ export const NotificationBell = () => {
 
   const handleNotificationClick = async (item) => {
     if (!item.isRead) {
-      await notificationService.markAsRead(item.id);
+      notificationService.markAsRead(item.id).catch(() => {});
       setNotifications((prev) =>
         prev.map((n) => (n.id === item.id ? { ...n, isRead: true } : n))
       );
     }
     setIsOpen(false);
+    if (item.link) {
+      navigate(item.link);
+    }
   };
 
   const handleMarkAllRead = async () => {
@@ -53,12 +60,19 @@ export const NotificationBell = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
   };
 
+  const toggleDropdown = () => {
+    if (!isOpen) {
+      fetchNotifications();
+    }
+    setIsOpen(!isOpen);
+  };
+
   return (
     <div className="relative" ref={dropdownRef}>
       {/* Bell Button */}
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={toggleDropdown}
         className="relative p-1.5 rounded-md text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:text-zinc-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none"
         aria-label="Notifications"
         aria-expanded={isOpen}
@@ -125,7 +139,7 @@ export const NotificationBell = () => {
                     </p>
                     <div className="flex items-center gap-1 mt-1 text-[10px] text-zinc-400">
                       <Clock className="w-3 h-3" />
-                      <span>{formatRelativeTime(item.timestamp)}</span>
+                      <span>{formatRelativeTime(item.timestamp || item.createdAt)}</span>
                     </div>
                   </div>
                   {!item.isRead && (

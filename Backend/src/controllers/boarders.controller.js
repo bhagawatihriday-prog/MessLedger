@@ -1,4 +1,5 @@
 import { query } from '../config/db.js';
+import { appCache } from '../utils/cache.js';
 
 /**
  * Format database boarder row to frontend model
@@ -251,6 +252,9 @@ export const addBoarder = async (req, res) => {
       await syncHostelRooms(targetHostel);
     }
 
+    appCache.del('hostels:all');
+    appCache.delPrefix('hostels:');
+
     return res.status(201).json(formatBoarder(result.rows[0]));
   } catch (error) {
     console.error('[ADD BOARDER ERROR]', error);
@@ -350,6 +354,11 @@ export const bulkImportBoarders = async (req, res) => {
     const affectedHostels = new Set(added.map((b) => b.hostel).filter(Boolean));
     for (const h of affectedHostels) {
       await syncHostelRooms(h);
+    }
+
+    if (added.length > 0) {
+      appCache.del('hostels:all');
+      appCache.delPrefix('hostels:');
     }
 
     return res.json({
@@ -486,6 +495,7 @@ export const updateBoarder = async (req, res) => {
         ]
       );
       updatedBoarder.is_registered = true;
+      appCache.delPrefix(`auth:${activeUserRes.rows[0].id}`);
     } else {
       updatedBoarder.is_registered = false;
     }
@@ -494,6 +504,9 @@ export const updateBoarder = async (req, res) => {
     if (updatedBoarder.hostel) {
       await syncHostelRooms(updatedBoarder.hostel);
     }
+
+    appCache.del('hostels:all');
+    appCache.delPrefix('hostels:');
 
     return res.json(formatBoarder(updatedBoarder));
   } catch (error) {
@@ -549,6 +562,11 @@ export const deleteBoarder = async (req, res) => {
         [targetBoarder.email, targetBoarder.roll_no]
       );
     }
+
+    // Invalidate cached auth & hostel directory
+    appCache.delPrefix('auth:');
+    appCache.del('hostels:all');
+    appCache.delPrefix('hostels:');
 
     return res.json({
       success: true,
@@ -623,6 +641,11 @@ export const deleteBoardersBulk = async (req, res) => {
         [emails, rollNos]
       );
     }
+
+    // Invalidate cached auth & hostel directory
+    appCache.delPrefix('auth:');
+    appCache.del('hostels:all');
+    appCache.delPrefix('hostels:');
 
     return res.json({
       success: true,

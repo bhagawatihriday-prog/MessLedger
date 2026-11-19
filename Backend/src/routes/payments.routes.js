@@ -3,6 +3,7 @@ import { authenticate } from '../middlewares/auth.js';
 import {
   createOrder,
   verifyPayment,
+  cancelPayment,
   handleWebhook,
 } from '../controllers/payments.controller.js';
 
@@ -21,6 +22,13 @@ router.post('/create-order', authenticate, createOrder);
  * @access  Private (Authenticated)
  */
 router.post('/verify', authenticate, verifyPayment);
+
+/**
+ * @route   POST /api/payments/cancel
+ * @desc    Marks pending payment order as FAILED when user dismisses or payment fails
+ * @access  Private (Authenticated)
+ */
+router.post('/cancel', authenticate, cancelPayment);
 
 /**
  * @route   POST /api/payments/webhook

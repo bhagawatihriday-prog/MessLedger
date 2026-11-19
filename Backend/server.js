@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import app from './src/app.js';
 import { testConnection } from './src/config/db.js';
+import { initSessionsTable } from './src/db/initSessions.js';
 
 const PORT = process.env.PORT || 5000;
 
@@ -14,7 +15,10 @@ const PORT = process.env.PORT || 5000;
   console.log(`===============================================`);
 
   // Establish DB connection before listening for requests
-  await testConnection();
+  const isConnected = await testConnection();
+  if (isConnected) {
+    await initSessionsTable();
+  }
 
   app.listen(PORT, () => {
     console.log(`  ✓ Server is now ready at http://localhost:${PORT}`);

@@ -239,8 +239,8 @@ export const createOrder = async (req, res) => {
     try {
       await query(
         `INSERT INTO payments (
-          id, bill_id, user_id, amount, payment_method, razorpay_order_id, status, idempotency_key
-        ) VALUES ($1, $2, $3, $4, $5, $6, 'PENDING', $7)
+          id, bill_id, user_id, amount, payment_method, razorpay_order_id, status, idempotency_key, paid_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, 'PENDING', $7, CURRENT_TIMESTAMP)
         ON CONFLICT (idempotency_key) DO UPDATE SET amount = EXCLUDED.amount`,
         [paymentId, billId || null, userId, numericAmount, (notes.method || 'ONLINE').toUpperCase(), orderId, orderId]
       );
@@ -262,6 +262,49 @@ export const createOrder = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'Failed to create payment order.',
+      error: error.message,
+    });
+  }
+};
+
+/**
+ * POST /api/payments/cancel
+ * Marks a pending payment order as FAILED when student dismisses or backs out from gateway
+ */
+export const cancelPayment = async (req, res) => {
+  try {
+    const { orderId, reason = 'Payment dismissed by user' } = req.body;
+    const userId = req.user.id;
+
+    if (!orderId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Order ID is required to cancel payment.',
+      });
+    }
+
+    // Only update if currently PENDING so verified/successful payments are never overwritten
+    const result = await query(
+      `UPDATE payments
+       SET status = 'FAILED',
+           failure_reason = $1
+       WHERE razorpay_order_id = $2
+         AND user_id = $3
+         AND status = 'PENDING'
+       RETURNING id, razorpay_order_id, status`,
+      [reason, orderId, userId]
+    );
+
+    return res.json({
+      success: true,
+      message: 'Payment status marked as FAILED.',
+      updated: result.rows.length > 0,
+    });
+  } catch (error) {
+    console.error('[CANCEL PAYMENT ERROR]', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Failed to update payment status.',
       error: error.message,
     });
   }
@@ -558,6 +601,7 @@ export const handleWebhook = async (req, res) => {
 export default {
   createOrder,
   verifyPayment,
+  cancelPayment,
   handleWebhook,
   settleStudentDues,
 };

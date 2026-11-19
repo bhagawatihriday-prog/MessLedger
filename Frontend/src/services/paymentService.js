@@ -83,5 +83,25 @@ export const paymentService = {
       throw new Error(error.response?.data?.message || 'Payment signature verification failed.');
     }
   },
+
+  /**
+   * Cancel or mark pending payment as FAILED when user dismisses or payment fails
+   */
+  async cancelPayment({ orderId, reason = 'Payment cancelled by user' }) {
+    if (isMockMode) {
+      await simulateDelay(200);
+      return { success: true, message: 'Simulated payment marked as cancelled.' };
+    }
+
+    try {
+      return await api.post('/payments/cancel', {
+        orderId,
+        reason,
+      });
+    } catch (error) {
+      console.warn('Backend payment cancel notification failed:', error.message);
+      return { success: false, error: error.message };
+    }
+  },
 };
 

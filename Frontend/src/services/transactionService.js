@@ -8,25 +8,32 @@ export const transactionService = {
    * Fetches user's transaction ledger history
    */
   async getTransactions() {
+    const normalize = (txns) =>
+      (txns || []).map((t) => ({
+        ...t,
+        status: t.status === 'PENDING' ? 'FAILED' : (t.status || 'SUCCESS'),
+      }));
+
     if (isMockMode) {
       await simulateDelay(300);
       const saved = localStorage.getItem(TXN_STORAGE_KEY);
       if (saved) {
         try {
-          return JSON.parse(saved);
+          return normalize(JSON.parse(saved));
         } catch {
           // fallback
         }
       }
-      return MOCK_TRANSACTIONS;
+      return normalize(MOCK_TRANSACTIONS);
     }
 
     try {
-      return await api.get('/transactions');
+      const response = await api.get('/transactions');
+      return normalize(response);
     } catch (error) {
       console.warn('Using fallback transactions:', error.message);
       const saved = localStorage.getItem(TXN_STORAGE_KEY);
-      return saved ? JSON.parse(saved) : MOCK_TRANSACTIONS;
+      return normalize(saved ? JSON.parse(saved) : MOCK_TRANSACTIONS);
     }
   },
 

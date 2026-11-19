@@ -1,4 +1,5 @@
 import { query } from '../config/db.js';
+import { appCache } from '../utils/cache.js';
 
 /**
  * Format hostel row to match Frontend format
@@ -52,8 +53,15 @@ const HOSTEL_SELECT_SQL = `
  */
 export const getAllHostels = async (req, res) => {
   try {
+    const cachedHostels = appCache.get('hostels:all');
+    if (cachedHostels) {
+      return res.json(cachedHostels);
+    }
+
     const result = await query(`${HOSTEL_SELECT_SQL} ORDER BY h.name ASC`);
     const hostels = result.rows.map(formatHostel);
+    // Cache hostel directory for 10 minutes
+    appCache.set('hostels:all', hostels, 600);
     return res.json(hostels);
   } catch (error) {
     console.error('[HOSTELS ERROR]', error);
@@ -72,6 +80,12 @@ export const getAllHostels = async (req, res) => {
 export const getHostelByNameOrId = async (req, res) => {
   try {
     const param = req.params.nameOrId.trim().toLowerCase();
+    const cacheKey = `hostels:${param}`;
+    const cachedHostel = appCache.get(cacheKey);
+    if (cachedHostel) {
+      return res.json(cachedHostel);
+    }
+
     const result = await query(
       `${HOSTEL_SELECT_SQL} WHERE LOWER(h.id) = $1 OR LOWER(h.name) = $1 LIMIT 1`,
       [param]
@@ -84,7 +98,10 @@ export const getHostelByNameOrId = async (req, res) => {
       });
     }
 
-    return res.json(formatHostel(result.rows[0]));
+    const formatted = formatHostel(result.rows[0]);
+    // Cache specific hostel for 10 minutes
+    appCache.set(cacheKey, formatted, 600);
+    return res.json(formatted);
   } catch (error) {
     console.error('[HOSTEL BY NAME ERROR]', error);
     return res.status(500).json({

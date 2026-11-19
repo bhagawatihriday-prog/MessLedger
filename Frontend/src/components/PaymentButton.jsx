@@ -105,19 +105,30 @@ export const PaymentButton = ({
             await verifyPaymentWithBackend(response, order);
           },
           modal: {
-            ondismiss: () => {
+            ondismiss: async () => {
               setState('CANCELLED');
-              toast.warning('Payment was cancelled by user.');
+              toast.warning('Payment was cancelled.');
+              if (order?.orderId) {
+                await paymentService.cancelPayment({
+                  orderId: order.orderId,
+                  reason: 'User cancelled or dismissed payment without completing',
+                }).catch(() => {});
+              }
             },
           },
         };
 
         const rzp = new window.Razorpay(options);
-        rzp.on('payment.failed', (response) => {
+        rzp.on('payment.failed', async (response) => {
           setState('FAILED');
-          setErrorMessage(
-            response.error?.description || 'Your payment was declined by the bank.'
-          );
+          const reason = response.error?.description || 'Your payment was declined by the bank.';
+          setErrorMessage(reason);
+          if (order?.orderId) {
+            await paymentService.cancelPayment({
+              orderId: order.orderId,
+              reason,
+            }).catch(() => {});
+          }
         });
         rzp.open();
       } else {
@@ -176,16 +187,28 @@ export const PaymentButton = ({
     );
   };
 
-  const handleSimulatedFailure = () => {
+  const handleSimulatedFailure = async () => {
     setShowSimulatedModal(false);
     setState('FAILED');
     setErrorMessage('Simulated transaction decline: Insufficient balance in linked account.');
+    if (simulatingOrder?.orderId) {
+      await paymentService.cancelPayment({
+        orderId: simulatingOrder.orderId,
+        reason: 'Simulated decline: Insufficient balance in linked account.',
+      }).catch(() => {});
+    }
   };
 
-  const handleSimulatedCancel = () => {
+  const handleSimulatedCancel = async () => {
     setShowSimulatedModal(false);
     setState('CANCELLED');
     toast.info('Payment was cancelled.');
+    if (simulatingOrder?.orderId) {
+      await paymentService.cancelPayment({
+        orderId: simulatingOrder.orderId,
+        reason: 'User cancelled simulated payment modal',
+      }).catch(() => {});
+    }
   };
 
   // LOADING STATE

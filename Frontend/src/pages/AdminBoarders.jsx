@@ -807,11 +807,11 @@ export const AdminBoarders = () => {
                   </div>
 
                   {/* Footer Actions */}
-                  <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100 dark:border-zinc-850">
+                  <div className="flex flex-wrap items-center justify-end gap-1.5 pt-2 border-t border-zinc-100 dark:border-zinc-850">
                     <button
                       type="button"
                       onClick={() => handleOpenEditModal(bdr)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-md border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-md border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors shrink-0"
                     >
                       <Edit2 className="w-3 h-3 text-zinc-400" />
                       <span>Edit</span>
@@ -820,7 +820,7 @@ export const AdminBoarders = () => {
                       <button
                         type="button"
                         onClick={() => setDeletingUserAccountBoarder(bdr)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-md border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                        className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-md border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors shrink-0"
                       >
                         <UserX className="w-3 h-3" />
                         <span>Delete User</span>
@@ -829,7 +829,7 @@ export const AdminBoarders = () => {
                     <button
                       type="button"
                       onClick={() => setDeletingBoarder(bdr)}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-md border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                      className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-md border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors shrink-0"
                     >
                       <Trash2 className="w-3 h-3" />
                       <span>Permanently Delete</span>
@@ -1337,25 +1337,27 @@ export const AdminBoarders = () => {
       )}
       {/* Floating Bulk Action Bar */}
       {selectedIds.size > 0 && (
-        <div className="fixed bottom-6 inset-x-0 z-40 flex justify-center px-4 pointer-events-none animate-in fade-in slide-in-from-bottom-4 duration-200">
-          <div className="pointer-events-auto bg-zinc-900 dark:bg-zinc-850 text-white rounded-2xl shadow-2xl border border-zinc-700/60 px-4 py-3 flex flex-wrap items-center justify-between gap-3 max-w-2xl w-full">
-            <div className="flex items-center gap-2.5">
-              <span className="inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-zinc-800 text-zinc-100 text-xs font-bold font-mono">
-                {selectedIds.size}
-              </span>
-              <span className="text-xs font-medium text-zinc-200">
-                {selectedIds.size === 1 ? '1 student selected' : `${selectedIds.size} students selected`}
-              </span>
+        <div className="fixed bottom-[72px] md:bottom-6 inset-x-0 z-50 flex justify-center px-3 sm:px-4 pointer-events-none animate-in fade-in slide-in-from-bottom-4 duration-200">
+          <div className="pointer-events-auto bg-zinc-900 dark:bg-zinc-850 text-white rounded-2xl shadow-2xl border border-zinc-700/60 p-3 sm:px-4 sm:py-3 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 max-w-2xl w-full">
+            <div className="flex items-center justify-between sm:justify-start gap-2.5">
+              <div className="flex items-center gap-2">
+                <span className="inline-flex items-center justify-center min-w-[24px] h-6 px-1.5 rounded-full bg-zinc-800 text-zinc-100 text-xs font-bold font-mono">
+                  {selectedIds.size}
+                </span>
+                <span className="text-xs font-medium text-zinc-200">
+                  {selectedIds.size === 1 ? '1 student selected' : `${selectedIds.size} students selected`}
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={clearSelection}
-                className="text-[11px] text-zinc-400 hover:text-zinc-200 underline underline-offset-2 ml-1"
+                className="text-xs text-zinc-400 hover:text-zinc-200 underline underline-offset-2 ml-1"
               >
                 Clear
               </button>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 w-full sm:w-auto">
               {/* Bulk Delete User Accounts Button */}
               <button
                 type="button"
@@ -1366,14 +1368,14 @@ export const AdminBoarders = () => {
                     ? 'None of the selected students have registered user accounts'
                     : `Delete accounts for ${selectedRegisteredBoarders.length} registered student(s)`
                 }
-                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                className={`flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium transition-all ${
                   selectedRegisteredBoarders.length === 0
                     ? 'opacity-40 cursor-not-allowed bg-zinc-800 text-zinc-400'
                     : 'bg-zinc-800 hover:bg-zinc-700 text-rose-300 hover:text-rose-200 border border-zinc-700 shadow-xs'
                 }`}
               >
-                <UserX className="w-3.5 h-3.5 text-rose-400" />
-                <span>Delete Accounts ({selectedRegisteredBoarders.length})</span>
+                <UserX className="w-3.5 h-3.5 text-rose-400 shrink-0" />
+                <span className="truncate">Delete Accounts ({selectedRegisteredBoarders.length})</span>
               </button>
 
               {/* Bulk Permanently Delete Button */}
@@ -1381,10 +1383,10 @@ export const AdminBoarders = () => {
                 type="button"
                 onClick={() => setIsBulkRemoveRosterModalOpen(true)}
                 title={`Permanently delete ${selectedIds.size} student(s) from hostel roster`}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition-colors"
+                className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-2 sm:py-1.5 rounded-lg text-xs font-medium bg-rose-600 hover:bg-rose-700 text-white shadow-xs transition-colors"
               >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Permanently Delete ({selectedIds.size})</span>
+                <Trash2 className="w-3.5 h-3.5 shrink-0" />
+                <span className="truncate">Permanently Delete ({selectedIds.size})</span>
               </button>
             </div>
           </div>

@@ -6,8 +6,11 @@ import {
   verifyInviteToken,
   login,
   googleAuth,
+  refreshSession,
   logout,
   getMe,
+  getActiveSessions,
+  revokeSession,
 } from '../controllers/auth.controller.js';
 
 const router = express.Router();
@@ -48,8 +51,15 @@ router.post('/login', login);
 router.post('/google', googleAuth);
 
 /**
+ * @route   POST /api/auth/refresh
+ * @desc    Rotate refresh token and issue fresh access token
+ * @access  Public (Requires valid refresh token)
+ */
+router.post('/refresh', refreshSession);
+
+/**
  * @route   POST /api/auth/logout
- * @desc    Clears authentication cookie and logs out
+ * @desc    Clears authentication cookies and revokes active session
  * @access  Public
  */
 router.post('/logout', logout);
@@ -60,5 +70,19 @@ router.post('/logout', logout);
  * @access  Private (Authenticated)
  */
 router.get('/me', authenticate, getMe);
+
+/**
+ * @route   GET /api/auth/sessions
+ * @desc    List all active sessions for current user
+ * @access  Private (Authenticated)
+ */
+router.get('/sessions', authenticate, getActiveSessions);
+
+/**
+ * @route   DELETE /api/auth/sessions/:sessionId
+ * @desc    Revoke specific session or all others
+ * @access  Private (Authenticated)
+ */
+router.delete('/sessions/:sessionId', authenticate, revokeSession);
 
 export default router;

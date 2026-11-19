@@ -9,6 +9,8 @@ import {
   Check,
   Clock,
   ArrowRight,
+  Receipt,
+  Sparkles,
 } from 'lucide-react';
 import { notificationService } from '../services/notificationService';
 import { formatRelativeTime } from '../utils/formatDate';
@@ -57,15 +59,21 @@ export const Notifications = () => {
   });
 
   const getIcon = (type) => {
-    switch (type) {
-      case 'success':
-        return <CheckCircle2 className="w-5 h-5 text-zinc-900 dark:text-zinc-100 shrink-0" />;
-      case 'warning':
-        return <AlertTriangle className="w-5 h-5 text-zinc-900 dark:text-zinc-100 shrink-0" />;
-      case 'danger':
-        return <AlertCircle className="w-5 h-5 text-zinc-900 dark:text-zinc-100 shrink-0" />;
+    const t = (type || 'INFO').toUpperCase();
+    switch (t) {
+      case 'PAYMENT':
+      case 'SUCCESS':
+        return <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />;
+      case 'BILL':
+        return <Receipt className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />;
+      case 'REBATE':
+        return <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />;
+      case 'WARNING':
+        return <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />;
+      case 'DANGER':
+        return <AlertCircle className="w-5 h-5 text-rose-600 dark:text-rose-400 shrink-0" />;
       default:
-        return <Info className="w-5 h-5 text-zinc-900 dark:text-zinc-100 shrink-0" />;
+        return <Info className="w-5 h-5 text-zinc-600 dark:text-zinc-400 shrink-0" />;
     }
   };
 
@@ -169,7 +177,7 @@ export const Notifications = () => {
                   <div className="flex items-center gap-4 mt-3 text-[11px] text-zinc-400">
                     <span className="flex items-center gap-1">
                       <Clock className="w-3.5 h-3.5" />
-                      {formatRelativeTime(item.timestamp)}
+                      {formatRelativeTime(item.timestamp || item.createdAt)}
                     </span>
 
                     {item.link && (

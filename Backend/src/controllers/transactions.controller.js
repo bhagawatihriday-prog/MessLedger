@@ -5,8 +5,8 @@ import { query } from '../config/db.js';
  */
 export const formatTransaction = (row) => ({
   id: row.id,
-  date: row.paid_at,
-  month: row.month || new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(row.paid_at)),
+  date: row.paid_at || new Date().toISOString(),
+  month: row.month || new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }).format(new Date(row.paid_at || Date.now())),
   title: `Payment (${row.payment_method || 'ONLINE'})`,
   type: 'CREDIT',
   amount: parseFloat(row.amount || 0),
@@ -14,7 +14,7 @@ export const formatTransaction = (row) => ({
   orderId: row.razorpay_order_id || null,
   paymentId: row.razorpay_payment_id || null,
   method: row.payment_method || 'ONLINE',
-  status: row.status,
+  status: row.status === 'PENDING' ? 'FAILED' : (row.status || 'SUCCESS'),
   studentName: row.user_name || null,
   rollNo: row.roll_no || null,
   hostel: row.hostel || null,
@@ -30,6 +30,18 @@ export const getTransactions = async (req, res) => {
   try {
     const userId = req.user.id;
     const userRole = req.user.role;
+
+    // Auto-fail all uncompleted PENDING transactions (they are abandoned checkout attempts)
+    try {
+      await query(
+        `UPDATE payments
+         SET status = 'FAILED',
+             failure_reason = 'Payment dismissed or abandoned without completion'
+         WHERE status = 'PENDING'`
+      );
+    } catch (cleanupErr) {
+      console.warn('[TRANSACTION CLEANUP WARNING]', cleanupErr.message);
+    }
 
     let result;
 

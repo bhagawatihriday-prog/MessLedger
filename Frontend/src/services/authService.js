@@ -3,6 +3,7 @@ import { MOCK_STUDENT_USER, MOCK_ADMIN_USER, DEMO_CREDENTIALS } from './mockData
 import { boarderService } from './boarderService';
 
 const TOKEN_KEY = 'messledger_token';
+const REFRESH_TOKEN_KEY = 'messledger_refresh_token';
 const USER_KEY = 'messledger_user';
 
 export const authService = {
@@ -18,6 +19,7 @@ export const authService = {
         const adminUser = { ...MOCK_ADMIN_USER, email };
         const token = `mock_jwt_admin_${Date.now()}`;
         localStorage.setItem(TOKEN_KEY, token);
+        localStorage.setItem(REFRESH_TOKEN_KEY, `mock_refresh_${Date.now()}`);
         localStorage.setItem(USER_KEY, JSON.stringify(adminUser));
         return { user: adminUser, token };
       }
@@ -30,14 +32,17 @@ export const authService = {
       };
       const token = `mock_jwt_student_${Date.now()}`;
       localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(REFRESH_TOKEN_KEY, `mock_refresh_${Date.now()}`);
       localStorage.setItem(USER_KEY, JSON.stringify(studentUser));
       return { user: studentUser, token };
     }
 
     try {
       const response = await api.post('/auth/login', { email, password });
-      const { user, token } = response;
-      if (token) localStorage.setItem(TOKEN_KEY, token);
+      const { user, token, accessToken, refreshToken } = response;
+      const effectiveToken = accessToken || token;
+      if (effectiveToken) localStorage.setItem(TOKEN_KEY, effectiveToken);
+      if (refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
       if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
       return response;
     } catch (error) {
@@ -79,8 +84,10 @@ export const authService = {
 
     try {
       const response = await api.post('/auth/register', studentData);
-      const { user, token } = response;
-      if (token) localStorage.setItem(TOKEN_KEY, token);
+      const { user, token, accessToken, refreshToken } = response;
+      const effectiveToken = accessToken || token;
+      if (effectiveToken) localStorage.setItem(TOKEN_KEY, effectiveToken);
+      if (refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
       if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
       return response;
     } catch (error) {
@@ -113,14 +120,17 @@ export const authService = {
       };
       const token = `mock_jwt_admin_${newAdmin.id}`;
       localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(REFRESH_TOKEN_KEY, `mock_refresh_${Date.now()}`);
       localStorage.setItem(USER_KEY, JSON.stringify(newAdmin));
       return { user: newAdmin, token };
     }
 
     try {
       const response = await api.post('/auth/admin-register', adminData);
-      const { user, token } = response;
-      if (token) localStorage.setItem(TOKEN_KEY, token);
+      const { user, token, accessToken, refreshToken } = response;
+      const effectiveToken = accessToken || token;
+      if (effectiveToken) localStorage.setItem(TOKEN_KEY, effectiveToken);
+      if (refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
       if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
       return response;
     } catch (error) {
@@ -169,8 +179,10 @@ export const authService = {
 
     try {
       const response = await api.post('/auth/google', { credential });
-      const { user, token } = response;
-      if (token) localStorage.setItem(TOKEN_KEY, token);
+      const { user, token, accessToken, refreshToken } = response;
+      const effectiveToken = accessToken || token;
+      if (effectiveToken) localStorage.setItem(TOKEN_KEY, effectiveToken);
+      if (refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
       if (user) localStorage.setItem(USER_KEY, JSON.stringify(user));
       return response;
     } catch (error) {
@@ -195,14 +207,46 @@ export const authService = {
   async logout() {
     try {
       if (!isMockMode) {
-        await api.post('/auth/logout');
+        const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+        await api.post('/auth/logout', { refreshToken }).catch(() => {});
       }
     } catch (err) {
       console.warn('Backend logout warning:', err);
     } finally {
       localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
       localStorage.removeItem(USER_KEY);
     }
+  },
+
+  /**
+   * Manually rotate or refresh active session tokens
+   */
+  async refreshToken() {
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
+    if (!refreshToken) throw new Error('No refresh token available');
+    const response = await api.post('/auth/refresh', { refreshToken });
+    const effectiveToken = response.accessToken || response.token;
+    if (effectiveToken) localStorage.setItem(TOKEN_KEY, effectiveToken);
+    if (response.refreshToken) localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
+    return response;
+  },
+
+  /**
+   * Fetch all active sessions across devices
+   */
+  async getActiveSessions() {
+    if (isMockMode) return [];
+    const response = await api.get('/auth/sessions');
+    return response.sessions || [];
+  },
+
+  /**
+   * Revoke a specific session or all other sessions
+   */
+  async revokeSession(sessionId) {
+    if (isMockMode) return { success: true };
+    return await api.delete(`/auth/sessions/${sessionId}`);
   },
 
   /**

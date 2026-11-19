@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { query } from '../config/db.js';
+import { appCache } from '../utils/cache.js';
 
 const JWT_SECRET = (process.env.JWT_SECRET || 'messledger_jwt_secret_key_2026').trim();
 
@@ -29,8 +30,49 @@ export const authenticate = async (req, res, next) => {
     } catch (err) {
       return res.status(401).json({
         success: false,
+        code: 'TOKEN_EXPIRED',
         message: 'Session has expired or is invalid. Please sign in again.',
       });
+    }
+
+    // Check in-memory cache for authorized user context (bypasses 2-3 DB queries)
+    const cacheKey = `auth:${decoded.id}:${decoded.sessionId || 'none'}`;
+    const cachedUser = appCache.get(cacheKey);
+
+    if (cachedUser) {
+      req.user = cachedUser;
+      req.sessionId = decoded.sessionId || null;
+      if (decoded.sessionId) {
+        // Non-blocking update of last_active_at timestamp
+        query('UPDATE user_sessions SET last_active_at = CURRENT_TIMESTAMP WHERE id = $1', [decoded.sessionId]).catch(() => {});
+      }
+      return next();
+    }
+
+    // Verify session state in database if sessionId is present
+    if (decoded.sessionId) {
+      try {
+        const sessionRes = await query(
+          'SELECT is_revoked, expires_at FROM user_sessions WHERE id = $1 LIMIT 1',
+          [decoded.sessionId]
+        );
+
+        if (sessionRes.rows.length > 0) {
+          const session = sessionRes.rows[0];
+          if (session.is_revoked || new Date(session.expires_at) < new Date()) {
+            return res.status(401).json({
+              success: false,
+              code: 'SESSION_REVOKED',
+              message: 'Your session has been terminated or logged out.',
+            });
+          }
+
+          // Asynchronously update last_active_at
+          query('UPDATE user_sessions SET last_active_at = CURRENT_TIMESTAMP WHERE id = $1', [decoded.sessionId]).catch(() => {});
+        }
+      } catch (sessErr) {
+        // Fallback gracefully if database session lookup encounters temporary error
+      }
     }
 
     // Fetch user from database
@@ -82,6 +124,11 @@ export const authenticate = async (req, res, next) => {
       avatarUrl: dbUser.avatar_url,
       joinedDate: dbUser.created_at ? dbUser.created_at.toISOString().split('T')[0] : '',
     };
+
+    req.sessionId = decoded.sessionId || null;
+
+    // Cache authenticated user context for 120 seconds
+    appCache.set(cacheKey, req.user, 120);
 
     next();
   } catch (error) {

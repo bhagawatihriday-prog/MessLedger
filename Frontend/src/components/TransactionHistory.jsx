@@ -141,26 +141,26 @@ export const TransactionHistory = ({ transactions = [] }) => {
                     </div>
                   </td>
                   <td className="py-3 px-3">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide ${
-                        txn.status === 'SUCCESS'
-                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-700/50'
-                          : txn.status === 'PENDING'
-                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-300/40 dark:border-amber-700/50'
-                          : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-300/40 dark:border-rose-700/50'
-                      }`}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${
-                          txn.status === 'SUCCESS'
-                            ? 'bg-emerald-500'
-                            : txn.status === 'PENDING'
-                            ? 'bg-amber-500'
-                            : 'bg-rose-500'
-                        }`}
-                      />
-                      {txn.status || 'SUCCESS'}
-                    </span>
+                    {(() => {
+                      const displayStatus = txn.status === 'PENDING' ? 'FAILED' : (txn.status || 'SUCCESS');
+                      const isSuccess = displayStatus === 'SUCCESS';
+                      return (
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wide ${
+                            isSuccess
+                              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-300/40 dark:border-emerald-700/50'
+                              : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300 border border-rose-300/40 dark:border-rose-700/50'
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              isSuccess ? 'bg-emerald-500' : 'bg-rose-500'
+                            }`}
+                          />
+                          {displayStatus}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td className="py-3 px-3 text-right">
                     <span
@@ -226,26 +226,26 @@ export const TransactionHistory = ({ transactions = [] }) => {
                     ? `-${formatCurrency(txn.amount)}`
                     : formatCurrency(txn.amount)}
                 </div>
-                <span
-                  className={`inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-semibold uppercase ${
-                    txn.status === 'SUCCESS'
-                      ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                      : txn.status === 'PENDING'
-                      ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
-                      : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
-                  }`}
-                >
-                  <span
-                    className={`w-1 h-1 rounded-full ${
-                      txn.status === 'SUCCESS'
-                        ? 'bg-emerald-500'
-                        : txn.status === 'PENDING'
-                        ? 'bg-amber-500'
-                        : 'bg-rose-500'
-                    }`}
-                  />
-                  {txn.status || 'SUCCESS'}
-                </span>
+                {(() => {
+                  const displayStatus = txn.status === 'PENDING' ? 'FAILED' : (txn.status || 'SUCCESS');
+                  const isSuccess = displayStatus === 'SUCCESS';
+                  return (
+                    <span
+                      className={`inline-flex items-center gap-1 px-1.5 py-0.2 rounded-full text-[9px] font-semibold uppercase ${
+                        isSuccess
+                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
+                          : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
+                      }`}
+                    >
+                      <span
+                        className={`w-1 h-1 rounded-full ${
+                          isSuccess ? 'bg-emerald-500' : 'bg-rose-500'
+                        }`}
+                      />
+                      {displayStatus}
+                    </span>
+                  );
+                })()}
               </div>
             </div>
           );
@@ -321,10 +321,10 @@ export const TransactionHistory = ({ transactions = [] }) => {
                       className={`text-[9px] font-semibold px-1.5 py-0.2 rounded-full uppercase ${
                         txn.status === 'SUCCESS'
                           ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300'
-                          : 'bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300'
+                          : 'bg-rose-100 text-rose-800 dark:bg-rose-950/60 dark:text-rose-300'
                       }`}
                     >
-                      {txn.status || 'SUCCESS'}
+                      {txn.status === 'PENDING' ? 'FAILED' : (txn.status || 'SUCCESS')}
                     </span>
                   </div>
                   <p className="text-zinc-400 text-[11px] mt-0.5">
